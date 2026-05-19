@@ -817,7 +817,7 @@
     },
     "component": "",
     "_componentId": "30490GRzmpBjrOYkmBEQhVW",
-    "handler": "openModal",
+    "handler": "openLoginModal",
     "customEventData": ""
   },
   {
@@ -1204,7 +1204,7 @@
     },
     "component": "",
     "_componentId": "30490GRzmpBjrOYkmBEQhVW",
-    "handler": "openModal",
+    "handler": "openSignupModal",
     "customEventData": ""
   },
   {
@@ -1833,7 +1833,7 @@
     "_enabled": true,
     "_string": "",
     "returnType": 0,
-    "maxLength": 8,
+    "maxLength": 30,
     "_tabIndex": 0,
     "editingDidBegan": [],
     "textChanged": [],
@@ -2305,7 +2305,7 @@
     "_enabled": true,
     "_string": "",
     "returnType": 0,
-    "maxLength": 8,
+    "maxLength": 20,
     "_tabIndex": 0,
     "editingDidBegan": [],
     "textChanged": [],
@@ -2777,7 +2777,7 @@
     "_enabled": true,
     "_string": "",
     "returnType": 0,
-    "maxLength": 8,
+    "maxLength": 20,
     "_tabIndex": 0,
     "editingDidBegan": [],
     "textChanged": [],
@@ -2792,7 +2792,7 @@
     "_N$background": {
       "__id__": 52
     },
-    "_N$inputFlag": 5,
+    "_N$inputFlag": 0,
     "_N$inputMode": 6,
     "_N$stayOnTop": false,
     "_id": "4dhlWmXDVAMZg9Qvh1i676"
@@ -3177,7 +3177,7 @@
     },
     "component": "",
     "_componentId": "30490GRzmpBjrOYkmBEQhVW",
-    "handler": "closeModal",
+    "handler": "onEnterClicked",
     "customEventData": ""
   },
   {
@@ -3720,6 +3720,15 @@
     },
     "loginModal": {
       "__id__": 25
+    },
+    "emailInput": {
+      "__id__": 38
+    },
+    "usernameInput": {
+      "__id__": 49
+    },
+    "passwordInput": {
+      "__id__": 60
     },
     "_id": "a1h/cVwcdIGpARcgjNwKum"
   }
