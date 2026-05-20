@@ -17,6 +17,10 @@ export default class MenuControl extends cc.Component {
     @property(cc.EditBox) usernameInput: cc.EditBox = null;
     @property(cc.EditBox) passwordInput: cc.EditBox = null;
 
+    // 新增綁定吐司框
+    @property(cc.Node) toastNode: cc.Node = null;
+    @property(cc.Label) toastLabel: cc.Label = null;
+
     // 紀錄目前是開啟登入還是註冊模式
     private isLoginMode: boolean = true; 
 
@@ -117,44 +121,58 @@ export default class MenuControl extends cc.Component {
         }
 
         if (this.isLoginMode) {
-            // 執行 Firebase 登入
+            // login
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    console.log("登入成功！歡迎回來：", userCredential.user.email);
-                    
-                    // 1. 關閉輸入框 Modal
+                    console.log("Login success! ", userCredential.user.email);
+        
                     this.loginModal.active = false;
-                    
-                    // 2. 顯示全黑的 LOADING 畫面
                     this.loadingScreen.active = true;
 
-                    // 3. 讓系統等 1.5 秒 (1.5秒後執行大括號裡面的事)
+                    // wait for 1.5s => levelSelect
                     this.scheduleOnce(() => {
-                        // 正式載入下一個場景
                         cc.director.loadScene("LevelSelect");
                     }, 1.5);
                 })
                 .catch((error) => {
-                    console.error("登入失敗：", error.message);
-                    // 這裡可以考慮加個 Label 顯示密碼錯誤給玩家看
+                    console.error("error:", error.message);
+                    this.showToast(error.message); 
                 });
         } else {
-            // 執行 Firebase 註冊
+            // sign up
             firebase.auth().createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    console.log("註冊成功！");
-                    // 註冊成功後，順便把 Username 更新到使用者的 Profile 裡
+                    console.log("sign up success!");
                     return userCredential.user.updateProfile({
                         displayName: username
                     });
                 })
                 .then(() => {
-                    console.log("使用者名稱已儲存！");
-                    // TODO: 註冊完後跳轉場景
+                    console.log("Username has benn saved.");
+                    this.loginModal.active = false;
+                    this.loadingScreen.active = true;
+
+                    // wait for 1.5s => levelSelect
+                    this.scheduleOnce(() => {
+                        cc.director.loadScene("LevelSelect");
+                    }, 1.5);
                 })
                 .catch((error) => {
-                    console.error("註冊失敗：", error.message);
+                    console.error("error:", error.message);
+                    this.showToast(error.message); 
                 });
         }
+    }
+
+    showToast (message: string) {
+        this.toastLabel.string = message;
+        this.toastNode.active = true;
+
+        this.unschedule(this.hideToast);
+        this.scheduleOnce(this.hideToast, 2.5);
+    }
+
+    hideToast () {
+        this.toastNode.active = false;
     }
 }
