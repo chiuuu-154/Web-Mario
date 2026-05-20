@@ -10,6 +10,7 @@ export default class MenuControl extends cc.Component {
     @property(cc.Node) btnLogin: cc.Node = null;
     @property(cc.Node) btnSignup: cc.Node = null;
     @property(cc.Node) loginModal: cc.Node = null;
+    @property(cc.Node) loadingScreen: cc.Node = null;
 
     // 新增綁定輸入框
     @property(cc.EditBox) emailInput: cc.EditBox = null;
@@ -120,11 +121,22 @@ export default class MenuControl extends cc.Component {
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     console.log("登入成功！歡迎回來：", userCredential.user.email);
-                    // TODO: 登入成功後跳轉場景
-                    // cc.director.loadScene("LevelSelect");
+                    
+                    // 1. 關閉輸入框 Modal
+                    this.loginModal.active = false;
+                    
+                    // 2. 顯示全黑的 LOADING 畫面
+                    this.loadingScreen.active = true;
+
+                    // 3. 讓系統等 1.5 秒 (1.5秒後執行大括號裡面的事)
+                    this.scheduleOnce(() => {
+                        // 正式載入下一個場景
+                        cc.director.loadScene("LevelSelect");
+                    }, 1.5);
                 })
                 .catch((error) => {
                     console.error("登入失敗：", error.message);
+                    // 這裡可以考慮加個 Label 顯示密碼錯誤給玩家看
                 });
         } else {
             // 執行 Firebase 註冊
