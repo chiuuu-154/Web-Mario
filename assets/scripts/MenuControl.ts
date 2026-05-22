@@ -79,14 +79,17 @@ export default class MenuControl extends cc.Component {
         }
     }
 
-    // 將原本的 openModal 拆分成兩個，這樣才知道玩家按了哪個
     openLoginModal () {
         this.isLoginMode = true;
+        // 登入模式：不需要填名字，直接把名字輸入框隱藏
+        this.usernameInput.node.active = false; 
         this.showModal();
     }
 
     openSignupModal () {
         this.isLoginMode = false;
+        // 註冊模式：需要設定名字，把名字輸入框顯示出來
+        this.usernameInput.node.active = true; 
         this.showModal();
     }
 
@@ -116,7 +119,12 @@ export default class MenuControl extends cc.Component {
         const username = this.usernameInput.string;
 
         if (!email || !password) {
-            console.warn("請輸入信箱與密碼！");
+            this.showToast("Please enter the email and the password!");
+            return;
+        }
+
+        if (!this.isLoginMode && !username) {
+            this.showToast("Please enter your name!");
             return;
         }
 
