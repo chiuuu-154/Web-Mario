@@ -19,6 +19,9 @@ export default class LevelSelectController extends cc.Component {
     @property(cc.Label)
     userNameLabel: cc.Label = null;
 
+    @property(cc.Node)
+    gameStartScreen: cc.Node = null;
+
     // 用來記錄第一關是否過關 (未來可以從全域變數或存檔讀取)
     // 現在先預設為 false 來測試反灰效果
     private isStage1Cleared: boolean = false; 
@@ -27,6 +30,7 @@ export default class LevelSelectController extends cc.Component {
         // 遊戲一開始：隱藏 Rule 視窗與遮罩
         this.ruleWindow.active = false;
         this.blocker.active = false;
+        this.gameStartScreen.active = false;
 
         // 檢查第二關的解鎖狀態
         this.checkStage2Lock();
@@ -96,5 +100,16 @@ export default class LevelSelectController extends cc.Component {
     public unlockStage2() {
         this.isStage1Cleared = true;
         this.checkStage2Lock();
+    }
+
+    // 新增：當玩家點擊 Stage 1 按鈕時觸發
+    public onStage1Clicked() {
+        // 1. 顯示過場畫面 (蓋住整個選關介面)
+        this.gameStartScreen.active = true;
+
+        // 2. 設定一個 2 秒的計時器，時間到就跳轉場景
+        this.scheduleOnce(() => {
+            cc.director.loadScene("GameView");
+        }, 2);
     }
 }
