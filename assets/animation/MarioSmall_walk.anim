@@ -1,0 +1,49 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "MarioSmall_walk",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.3,
+  "sample": 70,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "5b0f135f-db20-4065-adbc-8ea3932b4a1d"
+            }
+          },
+          {
+            "frame": 0.07142857142857142,
+            "value": {
+              "__uuid__": "2c186160-f018-4f19-84a1-e458964666dd"
+            }
+          },
+          {
+            "frame": 0.14285714285714285,
+            "value": {
+              "__uuid__": "5b0f135f-db20-4065-adbc-8ea3932b4a1d"
+            }
+          },
+          {
+            "frame": 0.21428571428571427,
+            "value": {
+              "__uuid__": "2c186160-f018-4f19-84a1-e458964666dd"
+            }
+          },
+          {
+            "frame": 0.2857142857142857,
+            "value": {
+              "__uuid__": "5b0f135f-db20-4065-adbc-8ea3932b4a1d"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

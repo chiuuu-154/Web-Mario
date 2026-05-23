@@ -1,0 +1,31 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "MarioSmall_jump",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.15,
+  "sample": 40,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "6220c605-41b6-4ddf-bacd-926cd0006d71"
+            }
+          },
+          {
+            "frame": 0.125,
+            "value": {
+              "__uuid__": "65eae283-70f5-482f-b03d-2a95b485e998"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}
