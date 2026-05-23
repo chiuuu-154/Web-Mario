@@ -139,4 +139,43 @@ export default class Mario extends cc.Component {
             this.isGrounded = true;
         }
     }
+
+    // 物理引擎內建函數：在產生真實碰撞的「前一幀」觸發
+    onPreSolve (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
+        
+        if (otherCollider.node.group !== "oneway") return;
+
+        let velocityY = this.rigidBody.linearVelocity.y;
+        
+        // 瑪利歐是獨立節點，所以用 node.getBoundingBox 絕對安全
+        let marioBottom = selfCollider.node.getBoundingBoxToWorld().yMin;
+
+        // 🌟 【終極修正】避開地圖節點陷阱，精準計算「這塊特定磚塊」的真實座標！
+        let boxCollider = otherCollider as cc.PhysicsBoxCollider;
+        
+        // 1. 將這塊磚塊中心的 offset 轉換成世界絕對座標
+        let blockWorldPos = boxCollider.node.convertToWorldSpaceAR(boxCollider.offset);
+        
+        // 2. 取得這塊磚塊獨立的真實高度 (並乘上地圖的縮放比例，例如你的 40/14)
+        let blockWorldHeight = boxCollider.size.height * Math.abs(boxCollider.node.scaleY);
+        
+        // 3. 算出這塊磚塊精準的「天靈蓋」座標
+        let blockTop = blockWorldPos.y + (blockWorldHeight / 2);
+
+        // --- 以下邏輯與之前相同，但這次數字絕對精準 ---
+
+        // 防手震 (大於 15 才判定為往上跳)
+        if (velocityY > 15) {
+            contact.disabled = true;
+            return;
+        }
+
+        // 動態容忍網 (精準的磚塊高度 * 0.8)
+        let dynamicTolerance = blockWorldHeight * 0.8;
+
+        // 如果瑪利歐的腳底沒有低於容忍網，就讓他站穩！
+        if (marioBottom < blockTop - dynamicTolerance) {
+            contact.disabled = true;
+        }
+    }
 }
