@@ -4,37 +4,49 @@ const {ccclass, property} = cc._decorator;
 export default class CameraController extends cc.Component {
 
     @property(cc.Node)
-    target: cc.Node = null; // 攝影機要追蹤的目標 (瑪利歐)
+    target: cc.Node = null; 
 
     @property(cc.Float)
-    minX: number = 0; // 攝影機最左邊能走到哪 (通常是 0，避免拍到左邊黑底)
+    minX: number = 0; 
 
     @property(cc.Float)
-    maxX: number = 3250; // 攝影機最右邊能走到哪 (避免拍到地圖盡頭的黑底，可以在編輯器微調)
+    maxX: number = 2000; 
 
-    private startY: number = 0; // 紀錄初始的 Y 高度
+    // 新增：觸發攝影機上升的「容忍高度」
+    @property(cc.Float)
+    yOffset: number = 150; 
+
+    private startY: number = 0; 
 
     onLoad () {
-        // 遊戲一開始時，先記住攝影機原本的高度，之後就永遠鎖死在這個高度
+        // 記住地平線的基礎高度，攝影機絕對不會低於這個高度
         this.startY = this.node.y;
     }
 
     update (dt) {
-        // 如果沒有綁定目標，就不要執行
         if (!this.target) return;
 
-        // 1. 取得瑪利歐現在的 X 座標
+        // === 1. X 軸邏輯 (跟之前一樣，嚴格鎖定邊界) ===
         let targetX = this.target.x;
-
-        // 2. 限制攝影機的 X 座標範圍 (不要超出左右邊界)
         let newX = targetX;
         if (newX < this.minX) {
-            newX = this.minX; // 瑪利歐在畫面左半邊時，攝影機停在 0
+            newX = this.minX; 
         } else if (newX > this.maxX) {
-            newX = this.maxX; // 瑪利歐快走到地圖盡頭時，攝影機停住
+            newX = this.maxX; 
         }
 
-        // 3. 更新攝影機的位置 (X 跟著瑪利歐，Y 鎖死不動)
-        this.node.setPosition(newX, this.startY);
+        // === 2. Y 軸邏輯 (垂直死區機制) ===
+        // 核心運算：如果瑪利歐的高度減掉 yOffset 後，大於原本的 startY，就取新的高度。
+        // Math.max 確保了就算瑪利歐掉進無底洞，攝影機也「絕對不會」跟著掉下去。
+        let targetY = Math.max(this.startY, this.target.y - this.yOffset);
+
+        // === 3. 套用平滑移動 (Lerp) ===
+        // X 軸直接對齊 (保持復古的緊密跟隨感)
+        // Y 軸使用 cc.misc.lerp 讓它「滑順」地往上拉或往下降，避免畫面瞬間閃動
+        let currentY = this.node.y;
+        let smoothY = cc.misc.lerp(currentY, targetY, dt * 5); // 數字 5 代表跟隨速度，可自行微調
+
+        // 正式更新攝影機座標
+        this.node.setPosition(newX, smoothY);
     }
 }
