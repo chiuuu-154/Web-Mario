@@ -235,6 +235,55 @@ export default class Mario extends cc.Component {
                 this.levelClear(finalBottomY);
             }, 0);
         }
+
+        // 🍄 吃蘑菇判定
+        if (otherCollider.getComponent("Mushroom")) {
+            
+            // 避開物理引擎鎖定
+            this.scheduleOnce(() => {
+                
+                // 🌟 加上終極保護傘：確認這顆蘑菇還「活著」，才執行吃掉的動作！
+                if (cc.isValid(otherCollider.node)) {
+                    otherCollider.node.destroy(); // 銷毀蘑菇
+                    this.growBig();               // 變大！
+                }
+                
+            }, 0);
+        }
+    }
+
+    growBig() {
+        // 如果已經是大的了，就不執行
+        if (this.isBig) return; 
+
+        console.log("吃蘑菇！變大啦！");
+        this.isBig = true; 
+
+        let collider = this.getComponent(cc.PhysicsBoxCollider);
+        
+        if (collider) {
+            let oldHeight = collider.size.height; // 小身高 (假設 16)
+            let newHeight = oldHeight * 2;        // 大身高 (假設 32)
+
+            // 🌟 核心修正魔法：計算高度差的一半，這是我們唯一的修正基準！
+            // (32 - 16) / 2 = 8 像素
+            let shiftAmount = (newHeight - oldHeight) / 2; 
+
+            // ===================================================
+            // 🌟 A. 物理修正 (維持原樣，但用 shiftAmount 統一計算)
+            // ===================================================
+            collider.size.height = newHeight;
+            collider.offset.y += shiftAmount; // 物理中心點往上提 8
+            collider.apply();
+
+            // ===================================================
+            // 🌟 B. 視覺精準修正 (解決 image_3.png 埋入問題！)
+            // ===================================================
+            // 既然我們把物理身體往上提了 8，
+            // 我們就也強制把整個人視覺上「也往上提 8 像素」！
+            // 這樣絕對不會有依賴 Sprite 高度延遲讀取的問題！
+            this.node.y += shiftAmount; // 強行把節點往上提 8
+        }
     }
 
     levelClear(bottomY: number) {

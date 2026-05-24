@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Question",
+    "_name": "Mushroom",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -30,13 +30,10 @@
       },
       {
         "__id__": 5
-      },
-      {
-        "__id__": 6
       }
     ],
     "_prefab": {
-      "__id__": 7
+      "__id__": 6
     },
     "_opacity": 255,
     "_color": {
@@ -101,7 +98,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "90e28b13-ce0b-4c65-b815-78e4e2a0ec5d"
+      "__uuid__": "6b6d8d5e-aa01-48cb-9211-ea80ce47e016"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -127,7 +124,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 0,
+    "_type": 2,
     "_allowSleep": true,
     "_gravityScale": 1,
     "_linearDamping": 0,
@@ -139,13 +136,13 @@
     },
     "_angularVelocity": 0,
     "_fixedRotation": false,
-    "enabledContactListener": true,
+    "enabledContactListener": false,
     "bullet": false,
     "awakeOnLoad": true,
     "_id": ""
   },
   {
-    "__type__": "cc.PhysicsBoxCollider",
+    "__type__": "cc.PhysicsPolygonCollider",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -163,53 +160,79 @@
       "x": 0,
       "y": 0
     },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 16,
-      "height": 16
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "f706dUz/41K+rwuu4t4DNq2",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "blockType": 1,
-    "emptyBlockSprite": {
-      "__uuid__": "a0d884b1-8ce2-45f3-9426-9d0596678365"
-    },
-    "coinPrefab": {
-      "__uuid__": "5067ea2b-fddc-4a4f-a08b-9e97dcf06d4b"
-    },
-    "mushroomPrefab": {
-      "__uuid__": "fe420fe9-c6b8-4fb9-b7c8-3753e371e923"
-    },
-    "scoreLabelPrefab": {
-      "__uuid__": "bdd86d09-437b-4ea1-a386-1829658698fe"
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "cc.Animation",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "_defaultClip": {
-      "__uuid__": "ee0291ff-8000-478c-883d-8e441005aac1"
-    },
-    "_clips": [
+    "points": [
       {
-        "__uuid__": "ee0291ff-8000-478c-883d-8e441005aac1"
+        "__type__": "cc.Vec2",
+        "x": -4.06,
+        "y": -8.07
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 4.08,
+        "y": -8.07
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 6.19,
+        "y": -6.02
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7.89,
+        "y": -3.07
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7.97,
+        "y": 2.94
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 6.67,
+        "y": 6.02
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 3,
+        "y": 7.98
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -2.92,
+        "y": 7.95
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -7,
+        "y": 5.9
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -7.93,
+        "y": 2.88
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -8.03,
+        "y": -3.07
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -6.1,
+        "y": -6.01
       }
     ],
-    "playOnLoad": true,
+    "_id": ""
+  },
+  {
+    "__type__": "694b7mwpJ9HjrRkHu2+jHh4",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "moveSpeed": 80,
     "_id": ""
   },
   {

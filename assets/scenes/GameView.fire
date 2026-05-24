@@ -2746,7 +2746,7 @@
       "__uuid__": "6a5716a3-fa7e-4572-a880-b204322d9a4d"
     },
     "_type": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 2,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -2824,6 +2824,18 @@
       },
       {
         "__uuid__": "a2b43e73-f1a0-418d-bd0a-69dc84f705e4"
+      },
+      {
+        "__uuid__": "6d30ac30-4c3c-471b-bbf9-3dfe5cff1d9d"
+      },
+      {
+        "__uuid__": "1cb0ccec-f1e0-48e3-a8ed-842d6a653943"
+      },
+      {
+        "__uuid__": "7556a664-7eee-4dfe-a297-f0044ed2d30d"
+      },
+      {
+        "__uuid__": "014e12af-2fd0-4625-aac7-c3fce23a70e0"
       }
     ],
     "playOnLoad": false,

@@ -22,6 +22,9 @@ export default class QuestionBlock extends cc.Component {
     coinPrefab: cc.Prefab = null;
 
     @property(cc.Prefab)
+    mushroomPrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
     scoreLabelPrefab: cc.Prefab = null; // 用於彈出「100」分數文字的預製體
 
     private isHit: boolean = false; // 是否已經被撞過了
@@ -141,6 +144,23 @@ export default class QuestionBlock extends cc.Component {
     }
 
     spawnMushroom() {
-        console.log("長出蘑菇！準備變大！下一回合我們再來寫這個 AI！");
+        if (!this.mushroomPrefab) {
+            console.error("你忘記綁定蘑菇預製體了！");
+            return;
+        }
+
+        // 生出蘑菇，並放在跟方塊一模一樣的位置 (被方塊擋住)
+        let mushroom = cc.instantiate(this.mushroomPrefab);
+        this.node.parent.addChild(mushroom);
+        mushroom.setPosition(this.node.x, this.node.y);
+
+        // 🌟 關鍵：為了讓蘑菇看起來是從方塊「後面」冒出來的，我們把層級調低
+        mushroom.zIndex = this.node.zIndex - 1;
+
+        // 呼叫蘑菇大腦裡的 popOut 函數，讓他開始緩緩升起！
+        let script = mushroom.getComponent("Mushroom");
+        if (script) {
+            script.popOut();
+        }
     }
 }
