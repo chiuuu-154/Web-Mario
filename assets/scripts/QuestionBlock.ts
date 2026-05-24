@@ -57,11 +57,19 @@ export default class QuestionBlock extends cc.Component {
     hitBlock() {
         this.isHit = true; 
 
-        // 方塊的往上彈動畫 (維持原樣，不需要Easing，因為它是剛體)
+        // 🌟 核心新增：被撞到的瞬間，強制停止閃爍動畫！
+        // 如果不停掉，等一下換成咖啡色磚塊後，動畫又會把它蓋成問號
+        let anim = this.getComponent(cc.Animation);
+        if (anim) {
+            anim.stop();
+        }
+
+        // 方塊的往上彈動畫 (維持原樣)
         cc.tween(this.node)
             .to(0.1, { y: this.startY + 12 }) 
             .to(0.1, { y: this.startY })      
             .call(() => {
+                // 動畫播完後，換成空磚塊圖片
                 if (this.emptyBlockSprite) {
                     this.getComponent(cc.Sprite).spriteFrame = this.emptyBlockSprite;
                 }

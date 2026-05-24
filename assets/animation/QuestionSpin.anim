@@ -1,0 +1,49 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "QuestionSpin",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.7,
+  "sample": 30,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "90e28b13-ce0b-4c65-b815-78e4e2a0ec5d"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "93622b55-5e3a-4966-a0ef-af71ea8c27d7"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "35c71207-8b40-4af3-8a73-867491c666df"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "39e7904b-7f22-4ba4-86d0-b2875449369d"
+            }
+          },
+          {
+            "frame": 0.6666666666666666,
+            "value": {
+              "__uuid__": "90e28b13-ce0b-4c65-b815-78e4e2a0ec5d"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

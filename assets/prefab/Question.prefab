@@ -30,10 +30,13 @@
       },
       {
         "__id__": 5
+      },
+      {
+        "__id__": 6
       }
     ],
     "_prefab": {
-      "__id__": 6
+      "__id__": 7
     },
     "_opacity": 255,
     "_color": {
@@ -185,6 +188,25 @@
     "scoreLabelPrefab": {
       "__uuid__": "bdd86d09-437b-4ea1-a386-1829658698fe"
     },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Animation",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_defaultClip": {
+      "__uuid__": "ee0291ff-8000-478c-883d-8e441005aac1"
+    },
+    "_clips": [
+      {
+        "__uuid__": "ee0291ff-8000-478c-883d-8e441005aac1"
+      }
+    ],
+    "playOnLoad": true,
     "_id": ""
   },
   {
