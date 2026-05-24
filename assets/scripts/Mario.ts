@@ -92,6 +92,10 @@ export default class Mario extends cc.Component {
     update (dt) {
         let velocity = this.rigidBody.linearVelocity;
 
+        if (velocity.y < -500) {
+            velocity.y = -500; 
+        }
+
         // ====================================================
         // 🌟 終極還原：瑪利歐電影謝幕模式 (滑降 -> 小跳 -> 散步)
         // ====================================================
@@ -138,7 +142,7 @@ export default class Mario extends cc.Component {
                 this.node.scaleX = Math.abs(this.node.scaleX);
 
                 // 走到定點就停下來 (假設城堡在旗桿右邊 300 像素)
-                if (this.node.x >= this.targetFlagX + 250) {
+                if (this.node.x >= this.targetFlagX + 230) {
                     velocity.x = 0;
                     this.isAutoWalking = false;
                     console.log("castle");
@@ -182,19 +186,31 @@ export default class Mario extends cc.Component {
         }
     }
 
-    // 2.5D 精准碰撞（維持原樣）
     onPreSolve (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
+        
         if (otherCollider.node.group !== "oneway") return;
+
         let velocityY = this.rigidBody.linearVelocity.y;
+        
+        // 往上跳時無條件穿透
+        if (velocityY > 15) {
+            contact.disabled = true;
+            return;
+        }
+
         let marioBottom = selfCollider.node.getBoundingBoxToWorld().yMin;
         let boxCollider = otherCollider as cc.PhysicsBoxCollider;
         let blockWorldPos = boxCollider.node.convertToWorldSpaceAR(boxCollider.offset);
         let blockWorldHeight = boxCollider.size.height * Math.abs(boxCollider.node.scaleY);
         let blockTop = blockWorldPos.y + (blockWorldHeight / 2);
 
-        if (velocityY > 15) { contact.disabled = true; return; }
-        let dynamicTolerance = blockWorldHeight * 0.8;
-        if (marioBottom < blockTop - dynamicTolerance) contact.disabled = true;
+        // 🌟 換回最穩定的「高度比例包容網」(0.9 代表包容方塊 90% 的高度)
+        // 因為有了上面的「終端速度」保護，這個網子絕對接得住他！
+        let dynamicTolerance = blockWorldHeight * 0.9; 
+
+        if (marioBottom < blockTop - dynamicTolerance) {
+            contact.disabled = true;
+        }
     }
 
     onBeginContact (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {

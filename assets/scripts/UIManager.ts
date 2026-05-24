@@ -7,10 +7,21 @@ export default class UIManager extends cc.Component {
     @property(cc.Label)
     timeLabel: cc.Label = null;
 
+    // 綁定畫面上的金幣和分數 Label
+    @property(cc.Label)
+    coinLabel: cc.Label = null;
+
+    @property(cc.Label)
+    scoreLabel: cc.Label = null;
+
     // 遊戲初始時間
     private timeLeft: number = 300; 
     // 控制計時器是否運作的開關
     private isRunning: boolean = true; 
+
+    // 新增：記錄目前的金幣和分數
+    private coinCount: number = 0;
+    private score: number = 0;
 
     onLoad () {
         // 遊戲一開始先強制作為 300 顯示
@@ -42,5 +53,14 @@ export default class UIManager extends cc.Component {
     // 這個函數是預留給「瑪利歐碰到旗子」時呼叫的
     public stopTimer() {
         this.isRunning = false;
+    }
+
+    // 加金幣函數
+    public addCoin() {
+        this.coinCount += 1;
+        this.score += 100; // 吃一個金幣加 100 分
+        
+        if (this.coinLabel) this.coinLabel.string = this.coinCount.toString();
+        if (this.scoreLabel) this.scoreLabel.string = this.score.toString().padStart(6, '0');
     }
 }
