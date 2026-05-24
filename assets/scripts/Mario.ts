@@ -7,7 +7,7 @@ export default class Mario extends cc.Component {
     moveSpeed: number = 200;
 
     @property(cc.Float)
-    jumpForce: number = 900; // 記得配合調整過的 Gravity Scale (例如 3 或 4)
+    jumpForce: number = 900; 
 
     @property(cc.Animation)
     anim: cc.Animation = null;
@@ -22,7 +22,12 @@ export default class Mario extends cc.Component {
     // 動畫相關狀態
     private isMoving: boolean = false; 
     private currentAnim: string = "";
-    private isBig: boolean = false; // 預設為小瑪利歐
+    private isBig: boolean = false; 
+
+    // 🌟 新增：過關謝幕演出狀態機
+    private isLevelCleared: boolean = false; // 是否已觸發過關
+    private isSlidingDown: boolean = false;  // 是否正在滑旗杆
+    private isAutoWalking: boolean = false;   // 是否正在自動走向城堡
 
     onLoad () {
         this.rigidBody = this.getComponent(cc.RigidBody);
@@ -35,26 +40,27 @@ export default class Mario extends cc.Component {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
     }
 
-    // 動畫名稱產生器 (組合出 MarioSmall_walk, MarioSmall_idle 等名稱)
     private getAnimName(action: string): string {
         let sizePrefix = this.isBig ? "MarioBig_" : "MarioSmall_";
         return sizePrefix + action; 
     }
 
     onKeyDown (event: cc.Event.EventKeyboard) {
-        // 抓出瑪利歐現在「真正的寬度大小」，確保比例不會跑掉
+        // 🌟 防呆：過關之後，鍵盤完全失效，不理會玩家操作
+        if (this.isLevelCleared) return;
+
         let currentScale = Math.abs(this.node.scaleX);
 
         switch(event.keyCode) {
             case cc.macro.KEY.a:
                 this.isMovingLeft = true;
-                this.isMoving = true; // 啟動走路動畫判定
-                this.node.scaleX = -currentScale; // 轉向左邊
+                this.isMoving = true; 
+                this.node.scaleX = -currentScale; 
                 break;
             case cc.macro.KEY.d:
                 this.isMovingRight = true;
-                this.isMoving = true; // 啟動走路動畫判定
-                this.node.scaleX = currentScale;  // 轉向右邊
+                this.isMoving = true; 
+                this.node.scaleX = currentScale;  
                 break;
             case cc.macro.KEY.k:
                 this.jump();
@@ -63,6 +69,9 @@ export default class Mario extends cc.Component {
     }
 
     onKeyUp (event: cc.Event.EventKeyboard) {
+        // 🌟 防呆：過關之後，鍵盤完全失效
+        if (this.isLevelCleared) return;
+
         switch(event.keyCode) {
             case cc.macro.KEY.a:
                 this.isMovingLeft = false;
@@ -70,19 +79,15 @@ export default class Mario extends cc.Component {
             case cc.macro.KEY.d:
                 this.isMovingRight = false;
                 break;
-            
-            // 完美保留：瑪利歐的「斷跳」魔法
             case cc.macro.KEY.k:
                 let velocity = this.rigidBody.linearVelocity;
-                // 如果玩家放開按鍵時，瑪利歐還在「往上飛」
                 if (velocity.y > 0) {
-                    velocity.y = velocity.y * 0.5; // 動能砍半
+                    velocity.y = velocity.y * 0.5; 
                     this.rigidBody.linearVelocity = velocity;
                 }
                 break;
         }
 
-        // 檢查是否 A 和 D 鍵都放開了，用來讓走路動畫停下來
         if (!this.isMovingLeft && !this.isMovingRight) {
             this.isMoving = false;
         }
@@ -98,39 +103,111 @@ export default class Mario extends cc.Component {
     }
 
     update (dt) {
-        // === 1. 物理移動計算 ===
         let velocity = this.rigidBody.linearVelocity;
+
+        // ====================================================
+        // 🌟 【核心修改】過關自動演出電影模式
+        // ====================================================
+        if (this.isLevelCleared) {
+            if (this.isSlidingDown) {
+                velocity.x = 0;
+                velocity.y = -120; // 核心魔法：無視重力，強迫以固定速度滑下去
+                
+                // 觸底判定：如果腳踩到地了
+                if (this.isGrounded) {
+                    this.isSlidingDown = false;
+                    this.isAutoWalking = true; // 切換成自動散步狀態
+                    velocity.y = 0;
+                }
+            } else if (this.isAutoWalking) {
+                // 核心魔法：瑪利歐靈魂附體，自己轉向右邊，慢慢走向城堡
+                let currentScale = Math.abs(this.node.scaleX);
+                this.node.scaleX = currentScale; // 確保面向右邊
+                
+                velocity.x = this.moveSpeed * 0.5; // 速度砍半，優雅地散步
+                // y 軸此時留給正常重力，確保如果前方有階梯他能正常走下去
+            } else {
+                velocity.x = 0;
+            }
+            this.rigidBody.linearVelocity = velocity;
+
+            // 過關後的動畫狀態機管理
+            let targetAnim = "";
+            if (this.isSlidingDown) {
+                targetAnim = this.getAnimName("slide"); // 組合出 "MarioSmall_slide"
+            } else if (this.isAutoWalking) {
+                targetAnim = this.getAnimName("walk");  // 組合出 "MarioSmall_walk"
+            } else {
+                targetAnim = this.getAnimName("idle");  // 組合出 "MarioSmall_idle"
+            }
+
+            if (this.currentAnim !== targetAnim) {
+                let state = this.anim.getAnimationState(targetAnim);
+                if (state) {
+                    this.anim.play(targetAnim);
+                } else {
+                    // 防呆：如果你還沒做 slide 動畫，這裡會自動定格，看起來也會非常自然！
+                    this.anim.stop(); 
+                }
+                this.currentAnim = targetAnim;
+            }
+
+            return; // 🌟 執行完謝幕演出，直接中斷 update，絕對不讓玩家鍵盤控制干擾
+        }
+
+        // === 1. 正常遊戲：物理移動計算 ===
         if (this.isMovingLeft) {
             velocity.x = -this.moveSpeed;
         } else if (this.isMovingRight) {
             velocity.x = this.moveSpeed;
         } else {
-            velocity.x = 0; // 沒按鍵時停止滑行
+            velocity.x = 0; 
         }
         this.rigidBody.linearVelocity = velocity;
 
-        // === 2. 動畫狀態機判斷 ===
+        // === 2. 正常遊戲：動畫狀態機判斷 ===
         let targetAnim = "";
 
         if (!this.isGrounded) {
-            targetAnim = this.getAnimName("jump"); // 組合出 "MarioSmall_jump"
+            targetAnim = this.getAnimName("jump"); 
         } else if (this.isMoving) {
-            targetAnim = this.getAnimName("walk"); // 組合出 "MarioSmall_walk"
+            targetAnim = this.getAnimName("walk"); 
         } else {
-            targetAnim = this.getAnimName("idle"); // 組合出 "MarioSmall_idle"
+            targetAnim = this.getAnimName("idle"); 
         }
 
-        // 如果算出的動畫跟目前播的不一樣，就切換
         if (this.currentAnim !== targetAnim) {
-            // 防呆機制：確認動畫組件裡面真的有這個 Clip 才播放
             let state = this.anim.getAnimationState(targetAnim);
             if (state) {
                 this.anim.play(targetAnim);
             } else {
-                // 如果找不到對應的 Clip (例如還沒做 idle)，就先停止動畫，停在第一格
                 this.anim.stop();
             }
             this.currentAnim = targetAnim;
+        }
+    }
+
+    // 2.5D 精准碰撞修正 (保留原有的完美程式碼)
+    onPreSolve (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
+        if (otherCollider.node.group !== "oneway") return;
+
+        let velocityY = this.rigidBody.linearVelocity.y;
+        let marioBox = selfCollider.node.getBoundingBoxToWorld();
+        let blockBox = otherCollider.node.getBoundingBoxToWorld();
+
+        let marioBottom = marioBox.yMin;
+        let blockTop = blockBox.yMax;
+
+        if (velocityY > 15) {
+            contact.disabled = true;
+            return;
+        }
+
+        let blockWorldHeight = blockBox.height; 
+        let dynamicTolerance = blockWorldHeight * 0.8;
+
+        if (marioBottom < blockTop - dynamicTolerance) {
+            contact.disabled = true;
         }
     }
 
@@ -138,44 +215,37 @@ export default class Mario extends cc.Component {
         if (this.rigidBody.linearVelocity.y <= 0) {
             this.isGrounded = true;
         }
+
+        // 撞旗子 / 旗桿判定！
+        if (otherCollider.node.group === "flag" && !this.isLevelCleared) {
+            this.levelClear(); 
+        }
     }
 
-    // 物理引擎內建函數：在產生真實碰撞的「前一幀」觸發
-    onPreSolve (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
-        
-        if (otherCollider.node.group !== "oneway") return;
+    levelClear() {
+        this.isLevelCleared = true;
+        this.isSlidingDown = true; // 啟動滑行模式！
+        this.isAutoWalking = false;
 
-        let velocityY = this.rigidBody.linearVelocity.y;
-        
-        // 瑪利歐是獨立節點，所以用 node.getBoundingBox 絕對安全
-        let marioBottom = selfCollider.node.getBoundingBoxToWorld().yMin;
+        // 沒收玩家控制
+        this.isMovingLeft = false;
+        this.isMovingRight = false;
+        this.isMoving = false;
 
-        // 🌟 【終極修正】避開地圖節點陷阱，精準計算「這塊特定磚塊」的真實座標！
-        let boxCollider = otherCollider as cc.PhysicsBoxCollider;
-        
-        // 1. 將這塊磚塊中心的 offset 轉換成世界絕對座標
-        let blockWorldPos = boxCollider.node.convertToWorldSpaceAR(boxCollider.offset);
-        
-        // 2. 取得這塊磚塊獨立的真實高度 (並乘上地圖的縮放比例，例如你的 40/14)
-        let blockWorldHeight = boxCollider.size.height * Math.abs(boxCollider.node.scaleY);
-        
-        // 3. 算出這塊磚塊精準的「天靈蓋」座標
-        let blockTop = blockWorldPos.y + (blockWorldHeight / 2);
+        // 給予一個初始的下滑速度
+        let velocity = this.rigidBody.linearVelocity;
+        velocity.x = 0;
+        velocity.y = -120;
+        this.rigidBody.linearVelocity = velocity;
 
-        // --- 以下邏輯與之前相同，但這次數字絕對精準 ---
-
-        // 防手震 (大於 15 才判定為往上跳)
-        if (velocityY > 15) {
-            contact.disabled = true;
-            return;
-        }
-
-        // 動態容忍網 (精準的磚塊高度 * 0.8)
-        let dynamicTolerance = blockWorldHeight * 0.8;
-
-        // 如果瑪利歐的腳底沒有低於容忍網，就讓他站穩！
-        if (marioBottom < blockTop - dynamicTolerance) {
-            contact.disabled = true;
+        // 遙控 UIManager 停止計時
+        let uiManagerNode = cc.find("Canvas/Main Camera");
+        if (uiManagerNode) {
+            let uiManager = uiManagerNode.getComponent("UIManager");
+            if (uiManager) {
+                uiManager.stopTimer();
+                console.log("過關啦！時間停止！");
+            }
         }
     }
 }

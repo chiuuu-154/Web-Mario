@@ -9,9 +9,13 @@ export default class MapCollider extends cc.Component {
 
         // 1. 生成普通地板 (讀取 top 圖層，放入 default 群組)
         this.createCollidersForLayer(tiledMap, "top", "default", tileSize);
+        this.createCollidersForLayer(tiledMap, "toponBlack", "default", tileSize);
 
         // 2. 生成單向穿透平台 (讀取 oneway 圖層，放入 oneway 群組)
         this.createCollidersForLayer(tiledMap, "oneway", "oneway", tileSize);
+
+        // 3. 終點旗子 
+        //this.createCollidersForLayer(tiledMap, "flagBase", "flag", tileSize);
     }
 
     // 寫一個共用的生成函數，這樣以後你要加冰塊、岩漿圖層都很方便

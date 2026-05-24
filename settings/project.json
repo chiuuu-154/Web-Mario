@@ -1,15 +1,22 @@
 {
   "group-list": [
     "default",
-    "oneway"
+    "oneway",
+    "flag"
   ],
   "collision-matrix": [
     [
+      true,
       true,
       true
     ],
     [
       true,
+      false
+    ],
+    [
+      true,
+      false,
       false
     ]
   ],
