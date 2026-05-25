@@ -55,12 +55,22 @@ export default class UIManager extends cc.Component {
         this.isRunning = false;
     }
 
-    // 加金幣函數
+    // 🌟 新增：單純加分的函數（吃蘑菇、踩怪物都可以呼叫這個）
+    public addScore(amount: number) {
+        this.score += amount;
+        
+        // 刷新分數顯示 (補滿 6 位數)
+        if (this.scoreLabel) {
+            this.scoreLabel.string = this.score.toString().padStart(7, '0');
+        }
+    }
+
+    // 🪙 原有的加金幣函數（重構成呼叫 addScore）
     public addCoin() {
         this.coinCount += 1;
-        this.score += 100; // 吃一個金幣加 100 分
-        
         if (this.coinLabel) this.coinLabel.string = this.coinCount.toString();
-        if (this.scoreLabel) this.scoreLabel.string = this.score.toString().padStart(6, '0');
+        
+        // 🌟 金幣本身價值 100 分，直接呼叫上面的加分函數
+        this.addScore(100); 
     }
 }

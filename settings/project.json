@@ -2,10 +2,12 @@
   "group-list": [
     "default",
     "oneway",
-    "flag"
+    "flag",
+    "enemy"
   ],
   "collision-matrix": [
     [
+      true,
       true,
       true,
       true
@@ -16,6 +18,12 @@
     ],
     [
       true,
+      false,
+      false
+    ],
+    [
+      true,
+      false,
       false,
       false
     ]

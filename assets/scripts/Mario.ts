@@ -12,6 +12,12 @@ export default class Mario extends cc.Component {
     @property(cc.Animation)
     anim: cc.Animation = null;
 
+    @property(cc.Prefab)
+    scorePrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    score100Prefab: cc.Prefab = null;
+
     private rigidBody: cc.RigidBody = null;
     
     // 移動與物理狀態
@@ -222,13 +228,54 @@ export default class Mario extends cc.Component {
             }, 0);
         }
 
+        // 🍄 吃蘑菇判定
         if (otherCollider.getComponent("Mushroom")) {
+            
+            // 🌟 核心防護鎖：用 as any 繞過 TS 型別檢查，動態讀取 isEaten 標籤。
+            // 如果這顆蘑菇已經被貼上標籤，代表它是 0.001 秒內的重複碰撞，直接無視！
+            if ((otherCollider.node as any).isEaten) return;
+            
+            // 第一時間馬上鎖死！貼上「已吃過」的標籤
+            (otherCollider.node as any).isEaten = true;
+
             this.scheduleOnce(() => {
                 if (cc.isValid(otherCollider.node)) {
                     otherCollider.node.destroy(); 
                     this.growBig();               
+                    
+                    let headPos = cc.v3(this.node.x, this.node.y + 50, 0);
+                    this.spawnScoreEffect(headPos, 1000); 
                 }
             }, 0);
+        }
+
+        // 👿 撞到敵人的判定！
+        if (otherCollider.node.group === "enemy") {
+            let goomba = otherCollider.getComponent("Goomba");
+            if (goomba && goomba.isDead) return;
+
+            let marioBottom = selfCollider.node.getBoundingBoxToWorld().yMin;
+            let enemyCenter = otherCollider.node.getBoundingBoxToWorld().center.y;
+
+            if (this.rigidBody.linearVelocity.y < 0 && marioBottom > enemyCenter) {
+                if (goomba) goomba.die();
+
+                this.rigidBody.linearVelocity = cc.v2(this.rigidBody.linearVelocity.x, 600);
+
+                // 🌟 終極座標轉換法：
+                // 1. 把 Goomba 的相對座標，轉換成整個遊戲世界的「絕對 GPS 座標」
+                let worldPos = otherCollider.node.convertToWorldSpaceAR(cc.v2(0, 0));
+                
+                // 2. 把這個 GPS 座標，轉換成跟瑪利歐同一個圖層的相對座標
+                let localPos = this.node.parent.convertToNodeSpaceAR(worldPos);
+                
+                // 3. 往上提 40 像素，在 Goomba 的頭頂呼叫 100 分特效
+                let effectPos = cc.v3(localPos.x, localPos.y + 40, 0);
+                this.spawnScoreEffect(effectPos, 100);
+                
+            } else {
+                console.log("阿！瑪利歐被咬到了！");
+            }
         }
     }
 
@@ -285,6 +332,36 @@ export default class Mario extends cc.Component {
         if (cameraNode) {
             let uiManager = cameraNode.getComponent("UIManager");
             if (uiManager) uiManager.stopTimer();
+        }
+    }
+
+    // 🌟 加上 scoreAmount 參數，讓函數知道現在要加幾分
+    spawnScoreEffect(position: cc.Vec3, scoreAmount: number) {
+        
+        // 根據分數決定要抓哪一個 Prefab
+        let prefabToSpawn = (scoreAmount === 1000) ? this.scorePrefab : this.score100Prefab;
+        
+        if (prefabToSpawn) {
+            let scoreNode = cc.instantiate(prefabToSpawn);
+            this.node.parent.addChild(scoreNode);
+            scoreNode.setPosition(position);
+
+            cc.tween(scoreNode)
+                .parallel(
+                    cc.tween().by(0.6, { y: 60 }, { easing: 'sineOut' }),
+                    cc.tween().delay(0.3).to(0.3, { opacity: 0 }) 
+                )
+                .removeSelf() 
+                .start();
+        }
+
+        // 通知 UIManager 加分
+        let cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || cc.find("Canvas/world/Main Camera");
+        if (cameraNode) {
+            let uiManager = cameraNode.getComponent("UIManager");
+            if (uiManager && typeof uiManager["addScore"] === "function") {
+                uiManager["addScore"](scoreAmount); 
+            }
         }
     }
 }
