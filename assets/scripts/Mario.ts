@@ -276,6 +276,13 @@ export default class Mario extends cc.Component {
 
         // 👿 撞到敵人的判定！
         if (otherCollider.node.group === "enemy") {
+
+            // 🌟 新增：特例判定！如果是食人花，不管怎樣絕對是瑪利歐受傷！
+            if (otherCollider.getComponent("Piranha")) {
+                this.takeDamage();
+                return; // 直接中斷，不要執行後面的踩踏判定
+            }
+
             let goomba = otherCollider.getComponent("Goomba");
             if (goomba && goomba.isDead) return;
 
