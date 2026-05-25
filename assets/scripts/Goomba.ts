@@ -15,13 +15,16 @@ export default class Goomba extends cc.Component {
     }
 
     update (dt) {
+        // 🌟 新增：如果已經被踩死了，就立刻停止運作，不要再給他速度！
+        if (this.isDead) return;
+
         // 1. 取得當前的物理速度
         let velocity = this.rigidBody.linearVelocity;
         
-        // 2. 鎖定 X 軸速度，讓他保持等速移動
+        // 2. 鎖定 X 軸速度，讓他保持等速移動 (這行寫得很棒！)
         velocity.x = this.direction * this.moveSpeed;
 
-        // 3. 防呆機制：如果他不小心掉進坑裡，低於地圖最底端，就自我銷毀 (防止記憶體洩漏)
+        // 3. 防呆機制：掉進坑裡自我銷毀
         if (this.node.y < -200) {
             this.node.destroy();
             return;
@@ -31,21 +34,20 @@ export default class Goomba extends cc.Component {
         this.rigidBody.linearVelocity = velocity;
     }
 
-    // 🌟 碰撞判定：用來偵測有沒有撞到牆壁或水管
-    onBeginContact (contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
-        
-        // 取得碰撞的法向量 (能知道是從哪個方向撞到的)
+    onBeginContact(contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
+        // 1. 死掉就不用判斷撞牆了
+        if (this.isDead) return;
+
+        // 2. 取得撞擊的法向量 (找出是撞到哪一面)
         let normal = contact.getWorldManifold().normal;
 
-        // 如果撞到的是瑪利歐，我們交給瑪利歐去判定踩踏或受傷，Goomba 自己先不處理
-        if (otherCollider.node.name === "Mario" || otherCollider.node.group === "player") {
-            return; 
-        }
-
-        // 如果法向量的 X 絕對值很大，代表是從「側面」撞到東西 (牆壁、水管、或是另一隻 Goomba)
+        // 3. 🌟 防卡牆核心：如果法向量的 X 絕對值大於 0.5，代表撞到左邊或右邊的牆壁！
         if (Math.abs(normal.x) > 0.5) {
-            // 撞到牆壁了，轉向！
-            this.direction *= -1;
+            
+            // 把方向反轉！(如果是 1 就變 -1，如果是 -1 就變 1)
+            this.direction = -this.direction; 
+            
+            console.log("撞到牆壁了！Goomba 轉向！目前的 direction:", this.direction);
         }
     }
 

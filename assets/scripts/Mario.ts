@@ -21,8 +21,8 @@ export default class Mario extends cc.Component {
     @property(cc.Node)
     marioSprite: cc.Node = null;
 
-    @property({type: cc.Float, tooltip: "大馬力歐視覺圖片 Y 軸修正量"})
-    bigMarioVisualOffsetY: number = 0;
+    //@property({type: cc.Float, tooltip: "大馬力歐視覺圖片 Y 軸修正量"})
+    //bigMarioVisualOffsetY: number = 0;
 
     private rigidBody: cc.RigidBody = null;
     
@@ -304,7 +304,7 @@ export default class Mario extends cc.Component {
         }
     }
 
-    growBig() {
+    /*growBig() {
         if (this.isBig) return;
         this.isBig = true;
 
@@ -320,6 +320,27 @@ export default class Mario extends cc.Component {
                 this.mainCollider.apply();
             }
         });
+    }*/
+
+    growBig() {
+        if (this.isBig) return;
+        this.isBig = true;
+
+        // 1. 馬上換成「大瑪利歐」的動畫
+        let anim = this.marioSprite.getComponent(cc.Animation);
+        if (anim) anim.play("Mario_Big_Idle"); 
+
+        // 2. 馬上換成大隻的物理碰撞體 (避開物理鎖死)
+        this.scheduleOnce(() => {
+            if (this.mainCollider && this.bigColliderPoints.length > 0) {
+                this.mainCollider.points = this.bigColliderPoints.map(p => cc.v2(p.x, p.y));
+                this.mainCollider.apply();
+            }
+        }, 0);
+
+        // 3. 視覺特效：把大瑪利歐的圖片 Y 軸先壓扁一半，然後閃爍長高到原本的大小！
+        let startScale = cc.v2(this.baseScale.x, this.baseScale.y * 0.5); 
+        this.stepFlashScale(startScale, this.baseScale);
     }
 
     levelClear(bottomY: number) {
@@ -378,7 +399,7 @@ export default class Mario extends cc.Component {
         }
     }
 
-    takeDamage() {
+    /*takeDamage() {
         if (this.isInvincible || this.isLevelCleared) return;
 
         if (this.isBig) {
@@ -400,11 +421,36 @@ export default class Mario extends cc.Component {
         } else {
             this.marioDie();
         }
+    }*/
+
+    takeDamage() {
+        if (this.isInvincible || this.isLevelCleared) return;
+        if (this.isBig) {
+            this.isBig = false;
+            
+            // 1. 馬上換成「小瑪利歐」的動畫
+            let anim = this.marioSprite.getComponent(cc.Animation);
+            if (anim) anim.play("Mario_Small_Idle"); 
+            
+            // 2. 馬上換成小隻的物理碰撞體
+            this.scheduleOnce(() => {
+                if (this.mainCollider && this.smallColliderPoints.length > 0) {
+                    this.mainCollider.points = this.smallColliderPoints.map(p => cc.v2(p.x, p.y-16));
+                    this.mainCollider.apply();
+                }
+            }, 0);
+
+            // 3. 視覺特效：把小瑪利歐的圖片 Y 軸先拉長 1.5 倍，然後閃爍縮回原本的大小！
+            let startScale = cc.v2(this.baseScale.x, this.baseScale.y * 1.5);
+            this.stepFlashScale(startScale, this.baseScale);
+        } else {
+            this.marioDie();
+        }
     }
 
     private invincibleTween: cc.Tween = null; // 用來記錄當前的 Tween，防止重複觸發
 
-    // 🌟 升級版：定格閃爍縮放總管 (現在支援同時控制 Scale 和 Position Y)
+    /*// 🌟 升級版：定格閃爍縮放總管 (現在支援同時控制 Scale 和 Position Y)
     // 參數：targetScale: 目標縮放, targetY: 目標 Y 座標, onCompleteCallback: 完成後要做的事
     stepFlashScale(targetScale: cc.Vec2, targetY: number, onCompleteCallback: Function = null) {
         if (!this.marioSprite) return;
@@ -440,6 +486,35 @@ export default class Mario extends cc.Component {
                 this.marioSprite.opacity = 255;
                 this.invincibleTween = null;
                 if (onCompleteCallback) onCompleteCallback(); 
+            })
+            .start();
+    }*/
+
+    stepFlashScale(startScale: cc.Vec2, targetScale: cc.Vec2) {
+        if (!this.marioSprite) return;
+        if (this.invincibleTween) this.invincibleTween.stop();
+        this.isInvincible = true;
+        
+        const flashCount = 4;
+        const stepTime = 0.08;
+        let t = cc.tween(this.marioSprite);
+
+        for (let i = 1; i <= flashCount; i++) {
+            let ratio = i / flashCount;
+            let stepScale = cc.v2(
+                cc.misc.lerp(startScale.x, targetScale.x, ratio),
+                cc.misc.lerp(startScale.y, targetScale.y, ratio)
+            );
+            // 只有縮放跟閃爍，沒有 Y 的位移！
+            t.to(stepTime, { opacity: 0, scaleX: stepScale.x, scaleY: stepScale.y }) 
+             .to(stepTime, { opacity: 255 }); 
+        }
+
+        this.invincibleTween = t
+            .call(() => {
+                this.isInvincible = false;
+                this.marioSprite.opacity = 255;
+                this.invincibleTween = null;
             })
             .start();
     }

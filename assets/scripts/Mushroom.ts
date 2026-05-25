@@ -15,6 +15,33 @@ export default class Mushroom extends cc.Component {
         
         // 🌟 剛出生的時候，強制關閉重力和碰撞反彈，讓他乖乖播「升起」動畫
         this.rigidBody.type = cc.RigidBodyType.Kinematic;
+
+        // 🌟 設定保鮮期：5 秒
+        const lifeTime = 5;
+
+        // 1. 先設定在 3.5 秒的時候，開始閃爍警告玩家「我要消失囉！」
+        this.scheduleOnce(() => {
+            // 確保這時候蘑菇還沒被瑪利歐吃掉
+            if (cc.isValid(this.node)) {
+                cc.tween(this.node)
+                    .repeatForever(
+                        cc.tween()
+                        .to(0.1, { opacity: 0 })
+                        .to(0.1, { opacity: 255 })
+                    )
+                    .start();
+            }
+        }, lifeTime - 1.5);
+
+        // 2. 設定在 5 秒時間到時，徹底銷毀
+        this.scheduleOnce(() => {
+            // 🌟 防呆機制：一定要加上 cc.isValid，
+            // 避免瑪利歐在 4.9 秒時把它吃掉並 destroy 了，計時器又 destroy 一次導致報錯！
+            if (cc.isValid(this.node)) {
+                this.node.destroy();
+                console.log("蘑菇保鮮期過了，自動消失！");
+            }
+        }, lifeTime);
     }
 
     // 這個函數會由 QuestionBlock 呼叫

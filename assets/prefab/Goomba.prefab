@@ -243,7 +243,18 @@
     "_id": ""
   },
   {
-    "__type__": "cc.PhysicsBoxCollider",
+    "__type__": "3c2fb3FD+RFfIyJwnRigBIC",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "moveSpeed": 80,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsPolygonCollider",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -259,24 +270,75 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": -3.6
+      "y": 0
     },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 15.1,
-      "height": 16.1
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "3c2fb3FD+RFfIyJwnRigBIC",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "moveSpeed": 80,
+    "points": [
+      {
+        "__type__": "cc.Vec2",
+        "x": -7.5,
+        "y": -1.9
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -7.4,
+        "y": -4.9
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -5.8,
+        "y": -6.6
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -3.8,
+        "y": -7.1
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -7.4,
+        "y": -10.2
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -7.4,
+        "y": -11.2
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7.6,
+        "y": -11.6
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7.4,
+        "y": -8.6
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 3,
+        "y": -7.2
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7.4,
+        "y": -5.5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7.4,
+        "y": -1.9
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 2.2,
+        "y": 3.4
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -2.2,
+        "y": 3.5
+      }
+    ],
     "_id": ""
   },
   {
