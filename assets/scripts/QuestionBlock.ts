@@ -39,7 +39,7 @@ export default class QuestionBlock extends cc.Component {
         if (this.isHit) return;
 
         // 🌟 防呆：記得確認你的瑪利歐名字叫 MarioSmall
-        if (otherCollider.node.name !== "MarioSmall") return;
+        if (otherCollider.node.name !== "Mario") return;
 
         let mario = otherCollider.node;
         let marioVelocityY = mario.getComponent(cc.RigidBody).linearVelocity.y;

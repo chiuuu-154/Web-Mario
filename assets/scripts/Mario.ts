@@ -18,6 +18,12 @@ export default class Mario extends cc.Component {
     @property(cc.Prefab)
     score100Prefab: cc.Prefab = null;
 
+    @property(cc.Node)
+    marioSprite: cc.Node = null;
+
+    @property({type: cc.Float, tooltip: "大馬力歐視覺圖片 Y 軸修正量"})
+    bigMarioVisualOffsetY: number = 0;
+
     private rigidBody: cc.RigidBody = null;
     
     // 移動與物理狀態
@@ -40,28 +46,47 @@ export default class Mario extends cc.Component {
     private groundY: number = 0; 
 
     private bigColliderPoints: cc.Vec2[] = [];
+
+    private smallColliderPoints: cc.Vec2[] = []; 
     private mainCollider: cc.PhysicsPolygonCollider = null;
+
+    private isInvincible: boolean = false;
+
+    private mainCollider: cc.PhysicsPolygonCollider = null;
+
+    // 🌟 新增這行：記住 MarioSprite 最初在場景上的 Scale
+    private baseScale: cc.Vec2 = cc.v2(1, 1);
 
     onLoad () {
         this.rigidBody = this.getComponent(cc.RigidBody);
+        // 🌟 抄下子節點的初始比例 (這樣你在編輯器怎麼調，程式都會自動配合)
+        if (this.marioSprite) {
+            this.baseScale = cc.v2(this.marioSprite.scaleX, this.marioSprite.scaleY);
+        }
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         this.groundY = 64; 
 
         this.bigColliderPoints = []; 
+        this.smallColliderPoints = []; // 🌟 初始化
+
         let colliders = this.getComponents(cc.PhysicsPolygonCollider);
         
         for (let c of colliders) {
             if (c.tag === 1) { 
                 this.mainCollider = c; 
+                // 🌟 把小隻的形狀也備份下來！
+                if (c.points && c.points.length > 0) {
+                    for (let p of c.points) {
+                        this.smallColliderPoints.push(cc.v2(p.x, p.y));
+                    }
+                }
             } else if (c.tag === 2) { 
-                // 🌟 終極深拷貝：確認有點才抄，而且是創造全新的座標點！
                 if (c.points && c.points.length > 0) {
                     for (let p of c.points) {
                         this.bigColliderPoints.push(cc.v2(p.x, p.y));
                     }
                 }
-                // 抄完之後徹底刪除大碰撞體
                 this.node.removeComponent(c); 
             }
         }
@@ -274,39 +299,27 @@ export default class Mario extends cc.Component {
                 this.spawnScoreEffect(effectPos, 100);
                 
             } else {
-                console.log("阿！瑪利歐被咬到了！");
+                this.takeDamage();
             }
         }
     }
 
     growBig() {
-        if (this.isBig) return; 
+        if (this.isBig) return;
+        this.isBig = true;
 
-        // 🌟 防護網：如果當初沒抄到大瑪利歐的點，立刻煞車，拒絕執行！
-        if (!this.mainCollider || this.bigColliderPoints.length === 0) {
-            console.error("警告：沒有抓到大瑪利歐的碰撞體點！請確認編輯器裡大碰撞體有打勾！");
-            return; 
-        }
-
-        console.log("吃蘑菇！變大啦！");
-        this.isBig = true; 
-
-        let smallBottom = Infinity;
-        for (let p of this.mainCollider.points) {
-            if (p.y < smallBottom) smallBottom = p.y;
-        }
-
-        let bigBottom = Infinity;
-        for (let p of this.bigColliderPoints) {
-            if (p.y < bigBottom) bigBottom = p.y;
-        }
-
-        // 🌟 核心魔法：用 map 產生「全新」的點給物理引擎刷新！
-        this.mainCollider.points = this.bigColliderPoints.map(p => cc.v2(p.x, p.y));
-        this.mainCollider.apply();
-
-        let shiftAmount = smallBottom - bigBottom; 
-        this.node.y += shiftAmount; 
+        // 🌟 修正：多傳入一個目標 Y 座標參數 (bigMarioVisualOffsetY)
+        this.stepFlashScale(this.baseScale, this.bigMarioVisualOffsetY, () => {
+            // 1. 切換成大瑪利歐的動畫！(請把名稱換成你實際的大隻動畫)
+            let anim = this.marioSprite.getComponent(cc.Animation);
+            if (anim) anim.play("Mario_Big_Idle"); // 替換成你的大隻動畫名稱
+            
+            // 2. 切換物理碰撞體為大隻
+            if (this.mainCollider && this.bigColliderPoints.length > 0) {
+                this.mainCollider.points = this.bigColliderPoints.map(p => cc.v2(p.x, p.y));
+                this.mainCollider.apply();
+            }
+        });
     }
 
     levelClear(bottomY: number) {
@@ -363,5 +376,90 @@ export default class Mario extends cc.Component {
                 uiManager["addScore"](scoreAmount); 
             }
         }
+    }
+
+    takeDamage() {
+        if (this.isInvincible || this.isLevelCleared) return;
+
+        if (this.isBig) {
+            this.isBig = false;
+            
+            // 🌟 修正：目標 Y 座標要變回小馬力歐的 0
+            this.stepFlashScale(this.baseScale, 0, () => {
+                // 1. 切換回小瑪利歐的動畫！(請把名稱換成你實際的小隻動畫)
+                let anim = this.marioSprite.getComponent(cc.Animation);
+                if (anim) anim.play("Mario_Small_Idle"); // 替換成你的小隻動畫名稱
+                
+                // 2. 切換物理碰撞體為小隻
+                if (this.mainCollider && this.smallColliderPoints.length > 0) {
+                    this.mainCollider.points = this.smallColliderPoints.map(p => cc.v2(p.x, p.y));
+                    this.mainCollider.apply();
+                }
+            });
+
+        } else {
+            this.marioDie();
+        }
+    }
+
+    private invincibleTween: cc.Tween = null; // 用來記錄當前的 Tween，防止重複觸發
+
+    // 🌟 升級版：定格閃爍縮放總管 (現在支援同時控制 Scale 和 Position Y)
+    // 參數：targetScale: 目標縮放, targetY: 目標 Y 座標, onCompleteCallback: 完成後要做的事
+    stepFlashScale(targetScale: cc.Vec2, targetY: number, onCompleteCallback: Function = null) {
+        if (!this.marioSprite) return;
+        if (this.invincibleTween) this.invincibleTween.stop();
+        this.isInvincible = true;
+
+        // 取得當前的 Scale 和 Y 座標
+        let currentScale = cc.v2(this.marioSprite.scaleX, this.marioSprite.scaleY);
+        let currentY = this.marioSprite.y; // 抄下目前的 Y 座標
+        
+        const flashCount = 4;
+        const stepTime = 0.08;
+        let t = cc.tween(this.marioSprite);
+
+        for (let i = 1; i <= flashCount; i++) {
+            let ratio = i / flashCount;
+            // 階段性算出當前的 Scale
+            let stepScale = cc.v2(
+                cc.misc.lerp(currentScale.x, targetScale.x, ratio),
+                cc.misc.lerp(currentScale.y, targetScale.y, ratio)
+            );
+            // 🌟 階段性算出當前的 Y 座標
+            let stepY = cc.misc.lerp(currentY, targetY, ratio);
+
+            // 定格閃爍邏輯：
+            t.to(stepTime, { opacity: 0, scaleX: stepScale.x, scaleY: stepScale.y, y: stepY }) // 閃隱 + 變大 + 搬移Y
+             .to(stepTime, { opacity: 255 }); // 閃現
+        }
+
+        this.invincibleTween = t
+            .call(() => {
+                this.isInvincible = false;
+                this.marioSprite.opacity = 255;
+                this.invincibleTween = null;
+                if (onCompleteCallback) onCompleteCallback(); 
+            })
+            .start();
+    }
+
+    // 🌟 瑪利歐死亡演出
+    marioDie() {
+        console.log("Game Over！瑪利歐死掉了！");
+        this.isLevelCleared = true; // 借用這個變數來鎖死玩家的操作
+
+        this.scheduleOnce(() => {
+            // 1. 關閉碰撞體，讓他掉出世界
+            if (this.mainCollider) this.mainCollider.enabled = false;
+            
+            // 2. 經典死亡彈跳 (往上彈一下然後掉進深淵)
+            this.rigidBody.linearVelocity = cc.v2(0, 800);
+            
+            // 3. 2 秒後重新載入當前場景 (復活)
+            this.scheduleOnce(() => {
+                cc.director.loadScene(cc.director.getScene().name);
+            }, 2);
+        }, 0);
     }
 }
