@@ -55,10 +55,21 @@ export default class MenuControl extends cc.Component {
             scriptAuth.src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
             document.head.appendChild(scriptAuth);
 
+            // Auth 載入完畢後...
             scriptAuth.onload = () => {
-                console.log("Firebase CDN 載入完成！");
-                // 兩個都載入成功後，才執行初始化
-                this.initFirebase();
+                
+                // 🌟 新增：接著載入 Database (資料庫) 模組！
+                let scriptDb = document.createElement('script');
+                scriptDb.src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js";
+                document.head.appendChild(scriptDb);
+
+                // 等 Database 也載入完畢後...
+                scriptDb.onload = () => {
+                    console.log("Firebase CDN 載入完成！(包含 Auth 與 Database)");
+                    
+                    // 三個核心都確定載入成功後，才執行初始化
+                    this.initFirebase();
+                };
             };
         };
     }
@@ -67,6 +78,7 @@ export default class MenuControl extends cc.Component {
         const firebaseConfig = {
             apiKey: "AIzaSyBGIfhOlBDk_lb_3wdPHpbMrv6lzIJXTOA",
             authDomain: "web-mario-ae9be.firebaseapp.com",
+            databaseURL: "https://web-mario-ae9be-default-rtdb.firebaseio.com",
             projectId: "web-mario-ae9be",
             storageBucket: "web-mario-ae9be.firebasestorage.app",
             messagingSenderId: "597177909029",

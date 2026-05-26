@@ -19,6 +19,12 @@ export default class LevelSelectController extends cc.Component {
     @property(cc.Label)
     userNameLabel: cc.Label = null;
 
+    @property(cc.Label)
+    totalCoinLabel: cc.Label = null;
+
+    @property(cc.Label)
+    highScoreLabel: cc.Label = null;
+
     // ❌ 已經刪除 gameStartScreen 變數宣告
 
     private isStage1Cleared: boolean = false; 
@@ -38,11 +44,42 @@ export default class LevelSelectController extends cc.Component {
                 if (user) {
                     let pName = user.displayName ? user.displayName : "PLAYER";
                     this.userNameLabel.string = pName.toUpperCase();
+                    
+                    // 🌟 2. 玩家登入成功後，立刻去 Firebase 抓他的資料！
+                    this.fetchUserData(user.uid);
                 } else {
                     this.userNameLabel.string = "USER: GUEST";
+                    
+                    // 沒登入的話，顯示預設值 0
+                    if (this.totalCoinLabel) this.totalCoinLabel.string = "0";
+                    if (this.highScoreLabel) this.highScoreLabel.string = "0000000";
                 }
             });
         }
+    }
+
+    // 🌟 3. 新增：從 Firebase 讀取數據並更新 UI 的函數
+    private fetchUserData(uid: string) {
+        let db = firebase.database();
+        let userRef = db.ref('users/' + uid);
+
+        userRef.once('value').then((snapshot) => {
+            let data = snapshot.val() || {};
+            let cloudCoins = data.coins || 0;
+            let cloudHighScore = data.highScore || 0;
+
+            // 更新畫面的 Label
+            if (this.totalCoinLabel) {
+                this.totalCoinLabel.string = cloudCoins.toString();
+            }
+            
+            if (this.highScoreLabel) {
+                // padStart 可以確保不足 7 位數時，前面自動補 0 (例如: 0001500)
+                this.highScoreLabel.string = cloudHighScore.toString().padStart(7, '0');
+            }
+        }).catch((error) => {
+            console.error("讀取資料失敗：", error);
+        });
     }
 
     private checkStage2Lock() {

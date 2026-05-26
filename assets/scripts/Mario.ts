@@ -25,6 +25,14 @@ export default class Mario extends cc.Component {
     @property(cc.Node)
     gameStartScreen: cc.Node = null; // 🌟 記得把 Canvas 底下的 gameStartScreen 拖進來
 
+    // 🌟 新增：Game Over 畫面的總節點
+    @property(cc.Node)
+    gameOverScreen: cc.Node = null;
+
+    // 🌟 新增：Game Over 畫面上要掉下來的瑪利歐圖片
+    @property(cc.Node)
+    gameOverMario: cc.Node = null;
+
     public static lives: number = 5;
 
     private isControllable: boolean = false; // 控管開場時能不能操作瑪利歐
@@ -639,15 +647,36 @@ export default class Mario extends cc.Component {
                     // (因為換成了靜態變數，這時候重載場景，金幣跟分數會完美留著！)
                     cc.director.loadScene(cc.director.getScene().name);
                 } else {
-                    // 【狀況 B】沒命了：Game Over，跳回關卡選擇畫面
                     console.log("GAME OVER！");
                     
-                    Mario.lives = 3; // 把生命值補滿
-                    
-                    // 🌟 核心新增：只有在這裡，生命真正歸零的時候，才呼叫 UIManager 把金幣分數清空！
-                    UIManager.resetData(); 
-                    
-                    cc.director.loadScene("levelSelect"); 
+                    // 🌟 1. 顯示 Game Over 畫面
+                    if (this.gameOverScreen) {
+                        this.gameOverScreen.active = true;
+                    }
+
+                    // 🌟 2. 執行瑪利歐掉落動畫
+                    if (this.gameOverMario) {
+                        // 先強制把他拉到高空 (y = 640)
+                        this.gameOverMario.y = 640;
+                        
+                        // 用 cc.tween 讓他掉落到 y = 320
+                        cc.tween(this.gameOverMario)
+                            // bounceOut 會有「掉到地上彈一下」的物理感，非常適合 Game Over
+                            .to(1.0, { y: 320 }, { easing: 'bounceOut' }) 
+                            .start();
+                    }
+
+                    // 🌟 3. 再等 2 秒後，執行雲端存檔，存完再跳轉回 LevelSelect
+                    this.scheduleOnce(() => {
+                        Mario.lives = 5; 
+                        
+                        // 呼叫 UIManager 的存檔功能
+                        UIManager.saveToFirebase(() => {
+                            UIManager.resetData(); 
+                            cc.director.loadScene("LevelSelect"); 
+                        });
+                        
+                    }, 2.0);
                 }
                 
             }, 2);

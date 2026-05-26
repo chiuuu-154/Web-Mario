@@ -1,4 +1,5 @@
 const {ccclass, property} = cc._decorator;
+declare const firebase: any;
 
 @ccclass
 export default class UIManager extends cc.Component {
@@ -86,31 +87,62 @@ export default class UIManager extends cc.Component {
         }
     }
 
+    // 🌟 新增：負責將數據存回 Firebase 的靜態函數
+    public static saveToFirebase(onComplete: Function) {
+        // 如果沒載入 Firebase 或玩家沒登入，直接結束存檔並執行回呼函數
+        if (typeof firebase === 'undefined' || !firebase.auth().currentUser) {
+            console.log("未登入，跳過雲端存檔");
+            if (onComplete) onComplete();
+            return;
+        }
+
+        let uid = firebase.auth().currentUser.uid;
+        let db = firebase.database();
+        let userRef = db.ref('users/' + uid); // 將資料存放在 users/玩家UID 底下
+
+        // 1. 先讀取雲端目前的數據
+        userRef.once('value').then((snapshot) => {
+            let data = snapshot.val() || {};
+            let cloudCoins = data.coins || 0;
+            let cloudHighScore = data.highScore || 0;
+
+            // 2. 進行結算：金幣累加、分數取最高
+            let newTotalCoins = cloudCoins + UIManager.coinCount;
+            let newHighScore = Math.max(cloudHighScore, UIManager.score);
+
+            // 3. 更新回 Firebase
+            return userRef.update({
+                coins: newTotalCoins,
+                highScore: newHighScore
+            });
+        }).then(() => {
+            console.log("雲端存檔成功！");
+            if (onComplete) onComplete();
+        }).catch((error) => {
+            console.error("存檔失敗：", error);
+            if (onComplete) onComplete(); // 就算失敗也要讓玩家能跳轉，不要卡死
+        });
+    }
+
+    // 🌟 修改：過關結算的跳轉邏輯
     public triggerLevelClear() {
-        // 1. 停止計時器
         this.isRunning = false;
-
-        // 2. 抓出剩餘時間 (無條件進位)
         let finalTime = Math.ceil(this.timeLeft);
-
-        // 3. 計算時間紅利 (時間 * 50)
         let bonusScore = finalTime * 50;
 
-        // 4. 更新過關畫面上的數字
-        if (this.clearTimeLabel) {
-            this.clearTimeLabel.string = finalTime.toString();
-        }
-        if (this.clearScoreLabel) {
-            this.clearScoreLabel.string = bonusScore.toString();
-        }
+        if (this.clearTimeLabel) this.clearTimeLabel.string = finalTime.toString();
+        if (this.clearScoreLabel) this.clearScoreLabel.string = bonusScore.toString();
+        if (this.levelClearPanel) this.levelClearPanel.active = true;
 
-        // 5. 把整包結算 UI 顯示出來！
-        if (this.levelClearPanel) {
-            this.levelClearPanel.active = true;
-        }
-
-        // 6. 把紅利加回原本左上角的總分！(呼叫我們之前寫好的 addScore)
         this.addScore(bonusScore);
+
+        // 🌟 核心修改：等待 5 秒後，先存檔，再歸零數據並跳轉
+        this.scheduleOnce(() => {
+            UIManager.saveToFirebase(() => {
+                UIManager.resetData(); // 存檔完畢後，把這局的分數洗掉
+                cc.director.loadScene("LevelSelect");
+            });
+        }, 5.0);
     }
 
     // 🌟 5. 新增：提供給 Mario.ts 在生命歸零、Game Over 時呼叫的歸零函數

@@ -1610,8 +1610,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 40,
-      "height": 36
+      "width": 128,
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1622,7 +1622,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        437,
+        398.444,
         30,
         0,
         0,
@@ -1664,8 +1664,8 @@
     "_dstBlendFactor": 771,
     "_string": "0",
     "_N$string": "0",
-    "_fontSize": 160,
-    "_lineHeight": 36,
+    "_fontSize": 128,
+    "_lineHeight": 30,
     "_enableWrapText": true,
     "_N$file": {
       "__uuid__": "9c2fd455-48e2-441b-b385-76e199fcc283"
@@ -1675,10 +1675,10 @@
     "_batchAsBitmap": false,
     "_styleFlags": 0,
     "_underlineHeight": 0,
-    "_N$horizontalAlign": 1,
+    "_N$horizontalAlign": 0,
     "_N$verticalAlign": 0,
     "_N$fontFamily": "Arial",
-    "_N$overflow": 0,
+    "_N$overflow": 3,
     "_N$cacheMode": 0,
     "_id": "3eUKDYNyRC9ZCRKftES2um"
   },
@@ -5211,6 +5211,12 @@
     },
     "userNameLabel": {
       "__id__": 52
+    },
+    "totalCoinLabel": {
+      "__id__": 36
+    },
+    "highScoreLabel": {
+      "__id__": 40
     },
     "_id": "31li9Z+P9LSYap0y4O/3bc"
   }
