@@ -47,7 +47,6 @@ export default class Goomba extends cc.Component {
             // 把方向反轉！(如果是 1 就變 -1，如果是 -1 就變 1)
             this.direction = -this.direction; 
             
-            console.log("撞到牆壁了！Goomba 轉向！目前的 direction:", this.direction);
         }
     }
 

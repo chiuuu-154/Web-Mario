@@ -1,0 +1,31 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "MarioSmall_die",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.3,
+  "sample": 20,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "6f53e2af-f079-48ed-99c7-bdd5fcfe8418"
+            }
+          },
+          {
+            "frame": 0.25,
+            "value": {
+              "__uuid__": "aff1c006-595e-4f31-9b67-8c75dc4a6429"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

@@ -21,8 +21,13 @@ export default class Mario extends cc.Component {
     @property(cc.Node)
     marioSprite: cc.Node = null;
 
-    //@property({type: cc.Float, tooltip: "大馬力歐視覺圖片 Y 軸修正量"})
-    //bigMarioVisualOffsetY: number = 0;
+    @property(cc.Node)
+    gameStartScreen: cc.Node = null; // 🌟 記得把 Canvas 底下的 gameStartScreen 拖進來
+
+    public static lives: number = 5;
+
+    private isControllable: boolean = false; // 控管開場時能不能操作瑪利歐
+    private isDead: boolean = false;
 
     private rigidBody: cc.RigidBody = null;
     
@@ -57,7 +62,30 @@ export default class Mario extends cc.Component {
     // 🌟 新增這行：記住 MarioSprite 最初在場景上的 Scale
     private baseScale: cc.Vec2 = cc.v2(1, 1);
 
+    start() {
+        // 🌟 2. 核心開場邏輯：不論是第一次進關卡還是死掉重開，都會觸發 start()
+        if (this.gameStartScreen) {
+            this.gameStartScreen.active = true;
+            this.isControllable = false; // 鎖定操作，不讓玩家在黑底畫面時偷跑
+
+            // 更新黑底畫面上的生命值數字 (假設你裡面有一個叫 LifeLabel 的 Node)
+            let labelNode = this.gameStartScreen.getChildByName("LifeLabel");
+            if (labelNode) {
+                labelNode.getComponent(cc.Label).string = "x " + Mario.lives;
+            }
+
+            // 2 秒後，關閉黑底過場，解放瑪利歐的操作權！
+            this.scheduleOnce(() => {
+                this.gameStartScreen.active = false;
+                this.isControllable = true; 
+            }, 2.0);
+        } else {
+            this.isControllable = true;
+        }
+    }
+
     onLoad () {
+        console.log(this.node.y);
         this.rigidBody = this.getComponent(cc.RigidBody);
         // 🌟 抄下子節點的初始比例 (這樣你在編輯器怎麼調，程式都會自動配合)
         if (this.marioSprite) {
@@ -138,6 +166,9 @@ export default class Mario extends cc.Component {
     }
 
     update (dt) {
+
+        if (!this.isControllable || this.isDead) return;
+
         let velocity = this.rigidBody.linearVelocity;
 
         if (velocity.y < -1200) {
@@ -192,6 +223,18 @@ export default class Mario extends cc.Component {
                 this.currentAnim = targetAnim;
             }
             return; 
+        }
+
+        // 🌟 3. 新增：最左邊界限制 (假設地圖最左邊座標是 X = 0)
+        if (this.node.x <= -480) {
+            this.node.x = -480; 
+        }
+
+        // 🌟 4. 新增：掉進地底下 (outofbound) 判定
+        // 假設你的地平線在 0 附近，深坑掉到 Y = -200 以下就判定死亡
+        if (this.node.y < -320) {
+            console.log(this.node.y);
+            this.marioDie();
         }
 
         if (this.isMovingLeft) velocity.x = -this.moveSpeed;
@@ -528,8 +571,16 @@ export default class Mario extends cc.Component {
 
     // 🌟 瑪利歐死亡演出
     marioDie() {
-        console.log("Game Over！瑪利歐死掉了！");
+        if (this.isDead) return;
+        this.isDead = true;
+        this.isControllable = false; // 斷開操作
+
+        console.log("馬力歐死亡！");
         this.isLevelCleared = true; // 借用這個變數來鎖死玩家的操作
+
+        // 🌟 1. 扣除生命值
+        Mario.lives--;
+        console.log("剩餘生命：", Mario.lives);
 
         this.scheduleOnce(() => {
             // 1. 關閉碰撞體，讓他掉出世界
@@ -538,9 +589,24 @@ export default class Mario extends cc.Component {
             // 2. 經典死亡彈跳 (往上彈一下然後掉進深淵)
             this.rigidBody.linearVelocity = cc.v2(0, 800);
             
-            // 3. 2 秒後重新載入當前場景 (復活)
+            // 3. 2 秒後執行：重新載入 或 Game Over
             this.scheduleOnce(() => {
-                cc.director.loadScene(cc.director.getScene().name);
+                
+                // 🌟 2. 判斷生命值！
+                if (Mario.lives > 0) {
+                    // 【狀況 A】還有命：重新載入當前場景 (復活)
+                    cc.director.loadScene(cc.director.getScene().name);
+                } else {
+                    // 【狀況 B】沒命了：Game Over，跳回關卡選擇畫面
+                    console.log("GAME OVER!");
+                    
+                    // 記得把生命值補滿，不然下次玩家進來還是 0 命
+                    Mario.lives = 3; 
+                    
+                    // 跳回關卡選擇場景 (請確認名字是不是 levelSelect)
+                    cc.director.loadScene("levelSelect"); 
+                }
+                
             }, 2);
         }, 0);
     }
