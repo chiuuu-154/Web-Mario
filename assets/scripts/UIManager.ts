@@ -3,74 +3,82 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class UIManager extends cc.Component {
 
-    // 綁定畫面上的時間 Label
     @property(cc.Label)
     timeLabel: cc.Label = null;
 
-    // 綁定畫面上的金幣和分數 Label
     @property(cc.Label)
     coinLabel: cc.Label = null;
 
     @property(cc.Label)
     scoreLabel: cc.Label = null;
 
-    // 遊戲初始時間
-    private timeLeft: number = 300; 
-    // 控制計時器是否運作的開關
+    @property(cc.Label)
+    lifeLabel: cc.Label = null;
+
+    private timeLeft: number = 302; 
     private isRunning: boolean = true; 
 
-    // 新增：記錄目前的金幣和分數
-    private coinCount: number = 0;
-    private score: number = 0;
+    // 🌟 1. 核心修改：把金幣和分數改成靜態變數 (static)，這樣關卡重開時數值才會保留！
+    public static coinCount: number = 0;
+    public static score: number = 0;
 
     onLoad () {
-        // 遊戲一開始先強制作為 300 顯示
         if (this.timeLabel) {
             this.timeLabel.string = this.timeLeft.toString();
         }
+
+        // 🌟 2. 新增：因為是靜態變數，關卡復活重開時，要把之前留下來的數值顯示出來！
+        this.updateVisuals();
+    }
+
+    // 🌟 新增：統一刷新畫面上金幣和分數的文字顯示
+    private updateVisuals() {
+        if (this.coinLabel) this.coinLabel.string = UIManager.coinCount.toString();
+        if (this.scoreLabel) this.scoreLabel.string = UIManager.score.toString().padStart(7, '0');
     }
 
     update (dt) {
-        // 如果計時器沒在跑 (例如碰到旗子了)，就不執行倒數
         if (!this.isRunning) return;
-
-        // dt 是兩幀之間的時間差 (大約 0.016 秒)，不斷扣除就是真實時間倒數
         this.timeLeft -= dt;
-
         if (this.timeLeft <= 0) {
             this.timeLeft = 0;
             this.isRunning = false;
-            // TODO: 之後可以在這裡觸發「時間到，瑪利歐死亡」的函數
         }
-
-        // 使用 Math.ceil (無條件進位) 讓 UI 只顯示整數
-        // 這樣 299.9 秒時 UI 還是顯示 300，直到低於 299 才會變成 299
         if (this.timeLabel) {
             this.timeLabel.string = Math.ceil(this.timeLeft).toString();
         }
     }
 
-    // 這個函數是預留給「瑪利歐碰到旗子」時呼叫的
     public stopTimer() {
         this.isRunning = false;
     }
 
-    // 🌟 新增：單純加分的函數（吃蘑菇、踩怪物都可以呼叫這個）
     public addScore(amount: number) {
-        this.score += amount;
+        // 🌟 3. 修改：凡是用到 score 的地方，都要改成 UIManager.score
+        UIManager.score += amount;
         
-        // 刷新分數顯示 (補滿 6 位數)
         if (this.scoreLabel) {
-            this.scoreLabel.string = this.score.toString().padStart(7, '0');
+            this.scoreLabel.string = UIManager.score.toString().padStart(7, '0');
         }
     }
 
-    // 🪙 原有的加金幣函數（重構成呼叫 addScore）
     public addCoin() {
-        this.coinCount += 1;
-        if (this.coinLabel) this.coinLabel.string = this.coinCount.toString();
+        // 🌟 4. 修改：凡是用到 coinCount 的地方，都要改成 UIManager.coinCount
+        UIManager.coinCount += 1;
+        if (this.coinLabel) this.coinLabel.string = UIManager.coinCount.toString();
         
-        // 🌟 金幣本身價值 100 分，直接呼叫上面的加分函數
         this.addScore(100); 
+    }
+
+    public updateLife(lives: number) {
+        if (this.lifeLabel) {
+            this.lifeLabel.string = lives.toString(); 
+        }
+    }
+
+    // 🌟 5. 新增：提供給 Mario.ts 在生命歸零、Game Over 時呼叫的歸零函數
+    public static resetData() {
+        UIManager.coinCount = 0;
+        UIManager.score = 0;
     }
 }

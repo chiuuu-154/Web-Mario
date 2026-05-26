@@ -3,8 +3,8 @@
   "_name": "MarioBig_walk",
   "_objFlags": 0,
   "_native": "",
-  "_duration": 0.35,
-  "sample": 60,
+  "_duration": 0.22,
+  "sample": 50,
   "speed": 1,
   "wrapMode": 2,
   "curveData": {
@@ -14,31 +14,19 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "3daaf638-0f76-4e49-9caa-2fc05e60a5e7"
+              "__uuid__": "0697d77a-ff9c-4463-9d1a-9f002235e0fd"
             }
           },
           {
-            "frame": 0.08333333333333333,
+            "frame": 0.1,
             "value": {
-              "__uuid__": "3daaf638-0f76-4e49-9caa-2fc05e60a5e7"
+              "__uuid__": "80dd6388-ad20-4d95-9a1a-5ca9cb7c139c"
             }
           },
           {
-            "frame": 0.16666666666666666,
+            "frame": 0.2,
             "value": {
-              "__uuid__": "5e1cb390-2d30-4da7-9afe-435545bb1eac"
-            }
-          },
-          {
-            "frame": 0.25,
-            "value": {
-              "__uuid__": "5e1cb390-2d30-4da7-9afe-435545bb1eac"
-            }
-          },
-          {
-            "frame": 0.3333333333333333,
-            "value": {
-              "__uuid__": "3daaf638-0f76-4e49-9caa-2fc05e60a5e7"
+              "__uuid__": "0697d77a-ff9c-4463-9d1a-9f002235e0fd"
             }
           }
         ]

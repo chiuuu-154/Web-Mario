@@ -4216,7 +4216,7 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": {
-      "__uuid__": "d7cb8855-4022-498d-9a12-0d283d4f95ad"
+      "__uuid__": "d340d29e-06f3-4655-8ba0-e1c5902cc441"
     },
     "_id": "d2gpV3CDtD9YPcI15DecxO"
   },
@@ -4258,6 +4258,9 @@
       },
       {
         "__uuid__": "a8c8665f-3fe1-4ac3-86e3-787e0ab0ea83"
+      },
+      {
+        "__uuid__": "fa4de02d-d541-4ecf-982f-0c7f1c1a4295"
       }
     ],
     "playOnLoad": false,
@@ -6015,6 +6018,9 @@
     },
     "scoreLabel": {
       "__id__": 147
+    },
+    "lifeLabel": {
+      "__id__": 135
     },
     "_id": "68GpjEAxpIN5anOpr6UtoZ"
   },

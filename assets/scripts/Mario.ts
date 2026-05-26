@@ -1,3 +1,4 @@
+import UIManager from "./UIManager"; // 🌟 請確保有這行，路徑根據你的專案調整
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -82,6 +83,15 @@ export default class Mario extends cc.Component {
         } else {
             this.isControllable = true;
         }
+
+        // 🌟 新增：遊戲開局時，通知 UIManager 顯示目前的生命值！
+        let cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera");
+        if (cameraNode) {
+            let uiManager = cameraNode.getComponent("UIManager");
+            if (uiManager) {
+                uiManager.updateLife(Mario.lives);
+            }
+        }
     }
 
     onLoad () {
@@ -118,6 +128,7 @@ export default class Mario extends cc.Component {
                 this.node.removeComponent(c); 
             }
         }
+        //this.mainCollider.points = this.smallColliderPoints.map(p => cc.v2(p.x, p.y-16));
     }
 
     onDestroy () {
@@ -569,7 +580,6 @@ export default class Mario extends cc.Component {
             .start();
     }
 
-    // 🌟 瑪利歐死亡演出
     marioDie() {
         if (this.isDead) return;
         this.isDead = true;
@@ -578,9 +588,28 @@ export default class Mario extends cc.Component {
         console.log("馬力歐死亡！");
         this.isLevelCleared = true; // 借用這個變數來鎖死玩家的操作
 
-        // 🌟 1. 扣除生命值
+        let anim = this.marioSprite.getComponent(cc.Animation);
+
+        if (anim) {
+            if (this.isBig) {
+                anim.play("MarioBig_die");
+            } else {
+                anim.play("MarioSmall_die");
+            }
+        }
+
+        // 扣除生命值
         Mario.lives--;
         console.log("剩餘生命：", Mario.lives);
+
+        // 🌟 新增：剛死掉扣完命的瞬間，通知 UIManager 更新畫面！
+        let cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera");
+        if (cameraNode) {
+            let uiManager = cameraNode.getComponent("UIManager");
+            if (uiManager) {
+                uiManager.updateLife(Mario.lives);
+            }
+        }
 
         this.scheduleOnce(() => {
             // 1. 關閉碰撞體，讓他掉出世界
@@ -589,21 +618,22 @@ export default class Mario extends cc.Component {
             // 2. 經典死亡彈跳 (往上彈一下然後掉進深淵)
             this.rigidBody.linearVelocity = cc.v2(0, 800);
             
-            // 3. 2 秒後執行：重新載入 或 Game Over
+            // 2 秒後執行：重新載入 或 Game Over
             this.scheduleOnce(() => {
                 
-                // 🌟 2. 判斷生命值！
                 if (Mario.lives > 0) {
-                    // 【狀況 A】還有命：重新載入當前場景 (復活)
+                    // 【狀況 A】還有命：重新載入當前場景
+                    // (因為換成了靜態變數，這時候重載場景，金幣跟分數會完美留著！)
                     cc.director.loadScene(cc.director.getScene().name);
                 } else {
                     // 【狀況 B】沒命了：Game Over，跳回關卡選擇畫面
-                    console.log("GAME OVER!");
+                    console.log("GAME OVER！");
                     
-                    // 記得把生命值補滿，不然下次玩家進來還是 0 命
-                    Mario.lives = 3; 
+                    Mario.lives = 3; // 把生命值補滿
                     
-                    // 跳回關卡選擇場景 (請確認名字是不是 levelSelect)
+                    // 🌟 核心新增：只有在這裡，生命真正歸零的時候，才呼叫 UIManager 把金幣分數清空！
+                    UIManager.resetData(); 
+                    
                     cc.director.loadScene("levelSelect"); 
                 }
                 
