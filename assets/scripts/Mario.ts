@@ -33,6 +33,28 @@ export default class Mario extends cc.Component {
     @property(cc.Node)
     gameOverMario: cc.Node = null;
 
+    // 🌟 新增：瑪利歐動作與狀態音效
+    @property({ type: cc.AudioClip })
+    jumpAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    dieAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    growAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    shrinkAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    stompAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    gameOverAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    slideAudio: cc.AudioClip = null;
+
     public static lives: number = 5;
 
     private isControllable: boolean = false; // 控管開場時能不能操作瑪利歐
@@ -178,6 +200,7 @@ export default class Mario extends cc.Component {
     jump () {
         if (this.isGrounded) {
             this.isGrounded = false;
+            if (this.jumpAudio) cc.audioEngine.playEffect(this.jumpAudio, false);
             let velocity = this.rigidBody.linearVelocity;
             velocity.y = this.jumpForce;
             this.rigidBody.linearVelocity = velocity;
@@ -367,6 +390,8 @@ export default class Mario extends cc.Component {
             if (this.rigidBody.linearVelocity.y < 0 && marioBottom > enemyCenter) {
                 if (goomba) goomba.die();
 
+                if (this.stompAudio) cc.audioEngine.playEffect(this.stompAudio, false);
+
                 this.rigidBody.linearVelocity = cc.v2(this.rigidBody.linearVelocity.x, 600);
 
                 // 🌟 終極座標轉換法：
@@ -408,6 +433,8 @@ export default class Mario extends cc.Component {
         if (this.isBig) return;
         this.isBig = true;
 
+        if (this.growAudio) cc.audioEngine.playEffect(this.growAudio, false);
+
         // 1. 馬上換成「大瑪利歐」的動畫
         let anim = this.marioSprite.getComponent(cc.Animation);
         if (anim) anim.play("Mario_Big_Idle"); 
@@ -427,6 +454,19 @@ export default class Mario extends cc.Component {
 
     levelClear(bottomY: number) {
         if (this.isLevelCleared) return; 
+
+        let canvasNode = cc.find("Canvas");
+        if (canvasNode) {
+            let bgm = canvasNode.getComponent(cc.AudioSource);
+            if (bgm) {
+                bgm.stop();
+            }
+        }
+
+        // 🌟 2. 新增：馬上播放滑旗桿的音效！
+        if (this.slideAudio) {
+            cc.audioEngine.playEffect(this.slideAudio, false);
+        }
 
         this.isLevelCleared = true;
         this.isSlidingDown = true; 
@@ -509,6 +549,8 @@ export default class Mario extends cc.Component {
         if (this.isInvincible || this.isLevelCleared) return;
         if (this.isBig) {
             this.isBig = false;
+
+            if (this.shrinkAudio) cc.audioEngine.playEffect(this.shrinkAudio, false);
             
             // 1. 馬上換成「小瑪利歐」的動畫
             let anim = this.marioSprite.getComponent(cc.Animation);
@@ -609,6 +651,14 @@ export default class Mario extends cc.Component {
         console.log("馬力歐死亡！");
         this.isLevelCleared = true; // 借用這個變數來鎖死玩家的操作
 
+        let canvasNode = cc.find("Canvas");
+        if (canvasNode) {
+            let bgm = canvasNode.getComponent(cc.AudioSource);
+            if (bgm) {
+                bgm.stop();
+            }
+        }
+
         let anim = this.marioSprite.getComponent(cc.Animation);
 
         if (anim) {
@@ -638,6 +688,7 @@ export default class Mario extends cc.Component {
             
             // 2. 經典死亡彈跳 (往上彈一下然後掉進深淵)
             this.rigidBody.linearVelocity = cc.v2(0, 800);
+            if (this.dieAudio) cc.audioEngine.playEffect(this.dieAudio, false);
             
             // 2 秒後執行：重新載入 或 Game Over
             this.scheduleOnce(() => {
@@ -645,14 +696,18 @@ export default class Mario extends cc.Component {
                 if (Mario.lives > 0) {
                     // 【狀況 A】還有命：重新載入當前場景
                     // (因為換成了靜態變數，這時候重載場景，金幣跟分數會完美留著！)
+                    //if (this.dieAudio) cc.audioEngine.playEffect(this.dieAudio, false);
                     cc.director.loadScene(cc.director.getScene().name);
                 } else {
                     console.log("GAME OVER！");
+
+                    if (this.gameOverAudio) cc.audioEngine.playEffect(this.gameOverAudio, false);
                     
                     // 🌟 1. 顯示 Game Over 畫面
                     if (this.gameOverScreen) {
                         this.gameOverScreen.active = true;
-                    }
+                    } else 
+                        console.log("no");
 
                     // 🌟 2. 執行瑪利歐掉落動畫
                     if (this.gameOverMario) {
@@ -676,10 +731,10 @@ export default class Mario extends cc.Component {
                             cc.director.loadScene("LevelSelect"); 
                         });
                         
-                    }, 2.0);
+                    }, 4.0);
                 }
                 
-            }, 2);
+            }, 2.5);
         }, 0);
     }
 }

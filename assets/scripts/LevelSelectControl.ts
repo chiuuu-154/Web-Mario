@@ -25,6 +25,12 @@ export default class LevelSelectController extends cc.Component {
     @property(cc.Label)
     highScoreLabel: cc.Label = null;
 
+    @property(cc.Node)
+    leaderboardPanel: cc.Node = null;
+
+    @property(cc.Label)
+    leaderboardText: cc.Label = null;
+
     // ❌ 已經刪除 gameStartScreen 變數宣告
 
     private isStage1Cleared: boolean = false; 
@@ -114,6 +120,49 @@ export default class LevelSelectController extends cc.Component {
         this.blocker.active = false;
         this.btnStage1.active = true;
         this.btnStage2.active = true;
+    }
+
+    public openLeaderboard() {
+        if (this.leaderboardPanel) {
+            this.leaderboardPanel.active = true;
+            this.leaderboardText.string = "LOADING..."; // 先顯示載入中
+            this.fetchLeaderboardData();
+        }
+    }
+
+    // 🌟 3. 新增：關閉排行榜的函數 (綁定給透明按鈕)
+    public closeLeaderboard() {
+        if (this.leaderboardPanel) {
+            this.leaderboardPanel.active = false;
+        }
+    }
+
+    // 🌟 4. 核心功能：從 Firebase 抓取所有玩家分數並排序
+    private fetchLeaderboardData() {
+        let db = firebase.database();
+        // 抓取 users 底下的所有資料，並依照 highScore 排序
+        db.ref('users').orderByChild('highScore').limitToLast(10).once('value').then((snapshot) => {
+            let players = [];
+            snapshot.forEach((childSnapshot) => {
+                players.push(childSnapshot.val());
+            });
+
+            // 因為 Firebase limitToLast 是從小排到大，所以我們要反轉陣列
+            players.reverse();
+
+            // 組裝字串
+            let boardString = "";
+            players.forEach((player, index) => {
+                let name = player.userName || "ANONYMOUS"; // 確保你有存 userName
+                let score = player.highScore || 0;
+                boardString += `${index + 1}. ${name.toUpperCase()}         ${score}\n`;
+            });
+
+            this.leaderboardText.string = boardString;
+        }).catch((error) => {
+            console.error("抓取排行榜失敗：", error);
+            this.leaderboardText.string = "FAILED TO LOAD DATA.";
+        });
     }
 
     public unlockStage2() {

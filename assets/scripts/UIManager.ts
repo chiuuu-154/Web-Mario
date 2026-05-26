@@ -26,6 +26,12 @@ export default class UIManager extends cc.Component {
     @property(cc.Label)
     clearScoreLabel: cc.Label = null; // 綁定 "clearscore" 節點
 
+    @property({ type: cc.AudioClip })
+    coinAudio: cc.AudioClip = null;
+
+    @property({ type: cc.AudioClip })
+    levelClearAudio: cc.AudioClip = null;
+
     private timeLeft: number = 302; 
     private isRunning: boolean = true; 
 
@@ -54,6 +60,16 @@ export default class UIManager extends cc.Component {
         if (this.timeLeft <= 0) {
             this.timeLeft = 0;
             this.isRunning = false;
+
+            let marioNode = cc.find("Canvas/world/Mario") || cc.find("Canvas/Mario") || cc.find("Mario");
+            
+            if (marioNode) {
+                let marioScript = marioNode.getComponent("Mario");
+                if (marioScript) {
+                    console.log("TIME UP");
+                    marioScript.marioDie(); // 直接呼叫馬力歐身上的死亡函數！
+                }
+            }
         }
         if (this.timeLabel) {
             this.timeLabel.string = Math.ceil(this.timeLeft).toString();
@@ -75,6 +91,8 @@ export default class UIManager extends cc.Component {
 
     public addCoin() {
         // 🌟 4. 修改：凡是用到 coinCount 的地方，都要改成 UIManager.coinCount
+        if (this.coinAudio) cc.audioEngine.playEffect(this.coinAudio, false);
+
         UIManager.coinCount += 1;
         if (this.coinLabel) this.coinLabel.string = UIManager.coinCount.toString();
         
@@ -96,7 +114,9 @@ export default class UIManager extends cc.Component {
             return;
         }
 
-        let uid = firebase.auth().currentUser.uid;
+        let user = firebase.auth().currentUser;
+        let uid = user.uid;
+        let pName = user.displayName ? user.displayName : (user.email ? user.email.split('@')[0] : "PLAYER");
         let db = firebase.database();
         let userRef = db.ref('users/' + uid); // 將資料存放在 users/玩家UID 底下
 
@@ -113,7 +133,8 @@ export default class UIManager extends cc.Component {
             // 3. 更新回 Firebase
             return userRef.update({
                 coins: newTotalCoins,
-                highScore: newHighScore
+                highScore: newHighScore,
+                userName: pName 
             });
         }).then(() => {
             console.log("雲端存檔成功！");
@@ -127,6 +148,14 @@ export default class UIManager extends cc.Component {
     // 🌟 修改：過關結算的跳轉邏輯
     public triggerLevelClear() {
         this.isRunning = false;
+        let canvasNode = cc.find("Canvas");
+        if (canvasNode) {
+            let bgm = canvasNode.getComponent(cc.AudioSource);
+            if (bgm) {
+                bgm.stop();
+            }
+        }
+        if (this.levelClearAudio) cc.audioEngine.playEffect(this.levelClearAudio, false);
         let finalTime = Math.ceil(this.timeLeft);
         let bonusScore = finalTime * 50;
 
