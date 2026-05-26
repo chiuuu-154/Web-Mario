@@ -216,6 +216,19 @@ export default class Mario extends cc.Component {
                     velocity.x = 0;
                     this.isAutoWalking = false;
                     console.log("castle");
+
+                    // 🌟 額外視覺優化：進城堡後讓瑪利歐隱形 (假裝他走進門裡了)
+                    //this.marioSprite.opacity = 0;
+
+                    // 🌟 核心修改：在這裡 (進城堡後) 才遙控 UIManager 啟動過關結算！
+                    let cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || cc.find("Canvas/world/Main Camera");
+                    if (cameraNode) {
+                        let uiManager = cameraNode.getComponent("UIManager");
+                        // 確保 UIManager 有這個函數再呼叫
+                        if (uiManager && typeof uiManager["triggerLevelClear"] === "function") {
+                            uiManager["triggerLevelClear"]();
+                        }
+                    }
                 }
             }
 

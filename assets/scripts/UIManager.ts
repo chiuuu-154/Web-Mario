@@ -15,6 +15,16 @@ export default class UIManager extends cc.Component {
     @property(cc.Label)
     lifeLabel: cc.Label = null;
 
+    // 🌟 1. 新增：綁定結算畫面的相關節點
+    @property(cc.Node)
+    levelClearPanel: cc.Node = null; // 剛剛打包的那整包結算 UI
+
+    @property(cc.Label)
+    clearTimeLabel: cc.Label = null; // 綁定 "clearTime" 節點
+
+    @property(cc.Label)
+    clearScoreLabel: cc.Label = null; // 綁定 "clearscore" 節點
+
     private timeLeft: number = 302; 
     private isRunning: boolean = true; 
 
@@ -74,6 +84,33 @@ export default class UIManager extends cc.Component {
         if (this.lifeLabel) {
             this.lifeLabel.string = lives.toString(); 
         }
+    }
+
+    public triggerLevelClear() {
+        // 1. 停止計時器
+        this.isRunning = false;
+
+        // 2. 抓出剩餘時間 (無條件進位)
+        let finalTime = Math.ceil(this.timeLeft);
+
+        // 3. 計算時間紅利 (時間 * 50)
+        let bonusScore = finalTime * 50;
+
+        // 4. 更新過關畫面上的數字
+        if (this.clearTimeLabel) {
+            this.clearTimeLabel.string = finalTime.toString();
+        }
+        if (this.clearScoreLabel) {
+            this.clearScoreLabel.string = bonusScore.toString();
+        }
+
+        // 5. 把整包結算 UI 顯示出來！
+        if (this.levelClearPanel) {
+            this.levelClearPanel.active = true;
+        }
+
+        // 6. 把紅利加回原本左上角的總分！(呼叫我們之前寫好的 addScore)
+        this.addScore(bonusScore);
     }
 
     // 🌟 5. 新增：提供給 Mario.ts 在生命歸零、Game Over 時呼叫的歸零函數
