@@ -718,13 +718,13 @@ export default class Mario extends cc.Component {
 
                     // 🌟 2. 執行瑪利歐掉落動畫
                     if (this.gameOverMario) {
-                        // 先強制把他拉到高空 (y = 640)
-                        this.gameOverMario.y = 640;
+                        // 先強制把他拉到高空 (y = 320)
+                        this.gameOverMario.y = 320;
                         
-                        // 用 cc.tween 讓他掉落到 y = 320
+                        // 用 cc.tween 讓他掉落到 y = 0
                         cc.tween(this.gameOverMario)
                             // bounceOut 會有「掉到地上彈一下」的物理感，非常適合 Game Over
-                            .to(1.0, { y: 320 }, { easing: 'bounceOut' }) 
+                            .to(1.0, { y: 33.872 }, { easing: 'bounceOut' }) 
                             .start();
                     }
 

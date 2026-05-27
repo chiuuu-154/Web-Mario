@@ -15,7 +15,9 @@ export default class Goomba extends cc.Component {
     }
 
     update (dt) {
+        // console.log("Goomba 座標:", this.node.position.x, this.node.position.y);
         // 🌟 新增：如果已經被踩死了，就立刻停止運作，不要再給他速度！
+        if(this.isDead) console.log("die");
         if (this.isDead) return;
 
         // 1. 取得當前的物理速度

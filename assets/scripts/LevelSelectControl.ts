@@ -1,3 +1,4 @@
+import Mario from "./Mario";
 const {ccclass, property} = cc._decorator;
 declare const firebase: any;
 
@@ -172,6 +173,7 @@ export default class LevelSelectController extends cc.Component {
 
     // 🌟 核心修改：點擊後瞬間跳轉，不再等待！
     public onStage1Clicked() {
+        Mario.lives = 5;
         // 直接載入場景！
         // GameView 載入完成後，那邊的 Mario.ts 會自動彈出黑畫面並扣 2 秒
         cc.director.loadScene("GameView");

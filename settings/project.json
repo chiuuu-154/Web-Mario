@@ -16,7 +16,10 @@
     ],
     [
       true,
-      false
+      false,
+      null,
+      true,
+      true
     ],
     [
       true,
@@ -25,13 +28,13 @@
     ],
     [
       true,
-      false,
+      true,
       false,
       false
     ],
     [
       true,
-      false,
+      true,
       false,
       false,
       false
@@ -63,5 +66,6 @@
       "enable": false
     }
   },
-  "start-scene": "7606b016-8280-4cbd-a104-436dccf47550"
+  "start-scene": "current",
+  "last-module-event-record-time": 1779869793878
 }
