@@ -125,6 +125,8 @@ export default class Mario extends cc.Component {
     }
 
     onLoad () {
+
+        //cc.director.getPhysicsManager().debugDrawFlags = 1;
         console.log(this.node.y);
         this.rigidBody = this.getComponent(cc.RigidBody);
         // 🌟 抄下子節點的初始比例 (這樣你在編輯器怎麼調，程式都會自動配合)
@@ -317,7 +319,12 @@ export default class Mario extends cc.Component {
 
         let velocityY = this.rigidBody.linearVelocity.y;
         
-        if (velocityY > 15) {
+        /*if (velocityY > 15) {
+            contact.disabled = true;
+            return;
+        }*/
+
+        if (velocityY > 5) {
             contact.disabled = true;
             return;
         }
@@ -328,9 +335,9 @@ export default class Mario extends cc.Component {
         let blockWorldHeight = boxCollider.size.height * Math.abs(boxCollider.node.scaleY);
         let blockTop = blockWorldPos.y + (blockWorldHeight / 2);
 
-        let dynamicTolerance = blockWorldHeight * 0.9; 
+        // let dynamicTolerance = blockWorldHeight * 0.9; 
 
-        if (marioBottom < blockTop - dynamicTolerance) {
+        if (marioBottom < blockTop - 5) {
             contact.disabled = true;
         }
     }

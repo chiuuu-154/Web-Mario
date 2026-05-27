@@ -3060,12 +3060,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 0
+      "y": 7
     },
     "_size": {
       "__type__": "cc.Size",
       "width": 22,
-      "height": 34
+      "height": 48
     },
     "_id": "85iiThWbRARIzM20onwZAQ"
   },
@@ -3363,12 +3363,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 0
+      "y": 7
     },
     "_size": {
       "__type__": "cc.Size",
       "width": 22,
-      "height": 34
+      "height": 48
     },
     "_id": "adD/bdOolP7LQBz1pNNhYX"
   },
@@ -3666,12 +3666,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 0
+      "y": 7
     },
     "_size": {
       "__type__": "cc.Size",
       "width": 22,
-      "height": 34
+      "height": 48
     },
     "_id": "435+L5aJxL9ZWHuAeBiYKO"
   },
@@ -3969,12 +3969,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 0
+      "y": 7
     },
     "_size": {
       "__type__": "cc.Size",
       "width": 22,
-      "height": 34
+      "height": 48
     },
     "_id": "5eVSFTK9xIb5C9cpHBSSSq"
   },
@@ -4306,7 +4306,7 @@
     },
     "_enabled": true,
     "moveSpeed": 200,
-    "jumpForce": 600,
+    "jumpForce": 650,
     "anim": {
       "__id__": 111
     },
@@ -5005,7 +5005,7 @@
     "tag": 1,
     "_density": 1,
     "_sensor": false,
-    "_friction": 0.2,
+    "_friction": 0,
     "_restitution": 0,
     "body": null,
     "_offset": {
